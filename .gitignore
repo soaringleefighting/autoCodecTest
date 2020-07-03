@@ -1,0 +1,11 @@
+
+*.o
+*.d
+*.a
+*.1.tlog
+*.log
+*.obj
+*.pdb
+*.ilk
+*.obj
+
