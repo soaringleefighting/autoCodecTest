@@ -110,7 +110,7 @@ do
 	RawCmd=${AnchorDemo}" -i "${file}
 	RefCmd=${RefDemo}" -i "${file}
 
-	#[2].Decoding svac streams using anchor and red decoder
+	#[2].Decoding svac streams using anchor and ref decoder
 	if [ "${YUVflag}"=="1" ];then
 		RefCmd=${RefCmd}" -d "${outyuvRef}
 		RawCmd=${RawCmd}" -d "${outyuvAnchor}
