@@ -1,0 +1,10 @@
+[ ./stream//dec.mpeg4 ]: ==24801==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==24810==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==24819==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==24831==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==24848==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
