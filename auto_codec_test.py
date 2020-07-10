@@ -1,5 +1,6 @@
 #_*_ coding=UTF-8_*_  #脚本中有中文注释必须包含这一句
 
+################################################################################################################
 ##脚本用法： python auto_codec_coherence.py rawDemo srcStreamDir outFileDir [gprofflag outyuvflag refDemo memcheckflag]
 ##参数说明：	rawDemo		:	待验证的可执行文件
 ##				srcStreamDir:	码流路径
@@ -8,6 +9,14 @@
 ##				outyuvflag	:	yuv输出开关(默认为0)：如果取0，表示解码不输出yuv,否则相反。
 ##				refDemo		: 	参考可执行文件
 ##				memcheckflag:	使用valgrind进行内存泄露检查(默认为0)(针对linux下编译的64位库)
+##
+## Created by lipeng at July 3 2020
+## Version 1.0
+## Modified:
+## (1)2020.7.3 create tag V1.0    支持批量编解码、一致性验证，支持Windows平台(Python)
+## (2)2020.7.6 create tag V2.0    支持valgrind和gprof分析
+## (3)2020.7.10 create tag V2.0.1 支持对编解码数据进行数据统计(格式输出并导入excel中)
+################################################################################################################
 import os
 import re
 import sys
@@ -16,6 +25,9 @@ import filecmp
 import shutil
 import subprocess
 import subprocess as sub
+import csv
+import codecs
+from   collections import OrderedDict
 
 space = ' '
 delimiter = '/'
@@ -55,6 +67,12 @@ def get_file_name(fullfilename):
 	tmp = fullfilename.strip()
 	name = os.path.split(tmp)[-1]   #提取文件名，不包含路径
 	return os.path.splitext(name)[0] #提取文件名，不包含后缀
+
+#提取文件的名字(包含后缀)
+def get_file_name_ext(fullfilename):
+	tmp = fullfilename.strip()
+	name = os.path.split(tmp)[-1]   #提取文件名，不包含路径
+	return name #提取文件名
 
 #创建文件目录
 def make_all_dir(path):	
@@ -102,6 +120,37 @@ def get_data_from_txt(filename, txtfile, outdatafile, anchor='1'):
         pFile.write(oneline)
         pFile.close()
 
+
+#collect data from format text to excel
+count = 0
+def collect_data_to_excel(excelname, inputfile, anchor='1'):
+    pFile = open(inputfile, 'a+')
+    lines = pFile.readlines()
+    #data = {}  ##默认字典是无序的(hash)
+    data = OrderedDict()  ##使用有序字典
+    #splitValue = []
+    
+    for i in range(len(lines)):
+        if lines[i].find('anchor') != -1 or lines[i].find('ref') != -1:
+            #print lines[i]
+            splitValue = lines[i].split()  ##此处根据具体文本数据格式进行分割提取
+            print splitValue
+            filename = get_file_name_ext(splitValue[0])
+            #print filename
+            data[filename] = [filename, splitValue[1], splitValue[2]]
+
+    pFile = open(excelname, 'a+')
+    pFile.write(codecs.BOM_UTF8)
+    csv_writer=csv.writer(pFile, dialect='excel')
+    global count
+    if count==0:  ##第一次打开文件时才写入
+        title=['video sequence', 'total frames', 'time(ms)']
+        csv_writer.writerow(title)
+        count=count+1
+    for key, value in data.items():
+        csv_writer.writerow(value)
+    pFile.close()
+                   
 #linux下内存泄漏检查valgrind
 def perform_valgrind_data(outFileDir, Anchordeccmd='0', onlystreamname='0', Refdeccmd='0', reserve='0'):
     outmemcheckanchortxt = outFileDir + delimiter  + '__pyMemcheckAnchor.log'
@@ -156,6 +205,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
 	outanchorNdec = outFileDir + delimiter + Anchor_Ndec + '.txt'
 	outredNdec = outFileDir + delimiter + Reference_Ndec + '.txt'
 	outMemchecklog = outFileDir + delimiter + Anchor_memchecklog + '.log'
+        outExcelData = outFileDir + delimiter +'__result.csv'  ## excel file
         
 	maxch = 70
 	spacesymbo = "-"
@@ -218,20 +268,20 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                         pFileRefNdec.write(refDemo+'cannot dec'+filename+' '+' ret: '+ bytes(ret)+'\n')
                         return -1
                 
-                    ## 5. gprof性能分析
+                    ## 3. gprof性能分析
 		    if(int(gprof)==1): #默认为0，表示不使用性能分析工具gprof
                         cmd = space.join(['gprof', rawDemo, 'gmon.out', '>', outFileDir+'/outgprof/'+onlystreamname+'_gprof_anchor.txt'])
                         print(cmd)
                         subprocess.call(cmd, shell=True)
                         
-		    ## 6.valgrind内存检查
+		    ## 4.valgrind内存检查
 		    if(memcheckflag != '0'):
                         #print cmd_ref
                         #exit()
                         ret = perform_valgrind_data(outFileDir, cmd_raw, filename, cmd_ref)
                         get_data_from_log(filename, outmemcheckanchortxt, outMemchecklog)
                         
-		## 3. 一致性比较
+		## 5. 一致性比较
                 if(refDemo != '0' and int(yuvflag) != 0):
 		    ret = yuv_cmp(outrawyuv, outrefyuv)
 		    if(ret!=0):
@@ -247,11 +297,13 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                         pFileDismatch.write(coherence)
                         pFileDismatch.write('\n')
                         
-                ## 4.将性能数据结果输出到excel中
+                ## 6.将性能数据结果输出到格式化文本中 outrawtxt--->outtotal
 		    get_data_from_txt(filename, outrawtxt, outtotal, 1)
 		    if(refDemo != '0'):
                         get_data_from_txt(filename, outreftxt, outtotal, 0)
-
+                ## 7.将数据结果从格式化文本写入到excel中 outtotal--->outExcelData
+                    collect_data_to_excel(outExcelData, outtotal, 1)
+                    print("-----collect data to excel success!------")
                 ## 关闭打开的文件               
                     pFileAnchorNdec.close()
                     if refDemo !=0:
@@ -288,4 +340,5 @@ if __name__ == '__main__':
 	memcheckflag = 0
     ret = process_encode_decode(rawDemo, srcStreamDir, outFileDir, gprof, yuvflag, refDemo, memcheckflag)
     if (ret!=0):
+        print("---------Process finished!---------")
 	exit()

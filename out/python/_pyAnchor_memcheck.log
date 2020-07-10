@@ -8,3 +8,41 @@
 
 [ ./stream//dec.mpeg4 ]: ==24848==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
 
+[ ./stream//dec.mpeg4 ]: ==9147==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9161==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9223==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9247==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9258==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9269==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9284==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9295==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9307==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9319==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9331==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9342==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9355==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9366==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9377==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9388==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9400==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9412==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+
+[ ./stream//dec.mpeg4 ]: ==9426==   total heap usage: 1,053 allocs, 1,052 frees, 7,366,224 bytes allocated
+

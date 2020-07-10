@@ -5,7 +5,7 @@ This is a codecs coherence and performance test script.
 
 1>、支持批量进行编码或解码；
 
-2>、支持对编解码的性能进行数据统计；
+2>、支持对编解码的性能进行数据统计（格式输出并导入excel中）；
 
 3>、支持对编解码进行一致性验证;
 
@@ -31,3 +31,10 @@ python auto_codec_test.py  ./bin/xvid_decraw  ./stream/ ./out/python  0 1 ./bin/
 
 1>、valgrind和gpof不能同时使用。
 
+## 5、Revision History
+
+1> 2020.7.3  create tag V1.0    支持批量编解码、一致性验证，支持Windows平台(Python)
+
+2> 2020.7.6  create tag V2.0    支持valgrind和gprof分析
+
+3> 2020.7.10 create tag V2.0.1  支持对编解码数据进行数据统计(格式输出并导入excel中)
