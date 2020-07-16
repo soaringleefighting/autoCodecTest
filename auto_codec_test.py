@@ -153,41 +153,6 @@ def collect_data_to_excel(excelname, inputfile, anchor='1'):
     for key, value in data.items():
         csv_writer.writerow(value)
     pFile.close()
-
-#collect data from format text to BDBR excel for ref data
-def collect_data_to_BDBRexcel(exceldata, datawt, inputfile, outexcel):
-    pFile = open(inputfile, 'a+')
-    lines = pFile.readlines()
-    data = collections.OrderedDict()  ##使用有序字典
-    splitValue = lines[0].strip().split(' ')
-    data[splitValue[0]] = [splitValue[0], splitValue[1], splitValue[2], splitValue[3]]
-    #print data
-    sequence_name_plus_qp = splitValue[0]
-    sequence_name = splitValue[0].split('_qp')[0]
-    #print sequence_name
-    sequence_qp = splitValue[0].split('_qp')[1]
-    #print sequence_qp
-
-    #exceldata.sheet_names()
-    #print("sheets: " + str(exceldata.sheet_names()))
-    table = exceldata.sheet_by_name('AI-Main')
-    table_wt = datawt.get_sheet('AI-Main')
-    #print("Total rows: " + str(table.nrows))
-    #print("Total columns: " + str(table.ncols))
-
-    ##遍历excel中每一行，存在匹配的字符串则写入对应的bitrate,Y-PSNR和EncT
-    nrows = table.nrows
-    for i in range(nrows):
-        if type(table.col_values(2)[i]) == float:  ##将float类型转换成int类型
-            qp = int(table.col_values(2)[i])
-        #print str(table.col_values(1)[i])
-        if str(table.col_values(1)[i]) == sequence_name and str(qp) == sequence_qp:
-            #print i
-            table_wt.write(i, 11, splitValue[1]) #write bitrate
-            table_wt.write(i, 12, splitValue[2]) #write Y-PSNR
-            table_wt.write(i, 15, splitValue[3]) #write EncT(s)
-    datawt.save(outexcel)
-    return 0
     
 #linux下内存泄漏检查valgrind
 def perform_valgrind_data(outFileDir, Anchordeccmd='0', onlystreamname='0', Refdeccmd='0', reserve='0'):
@@ -245,10 +210,6 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
 	outMemchecklog = outFileDir + delimiter + Anchor_memchecklog + '.log'
     
         outExcelData = outFileDir + delimiter +'__result.csv'   ##excel file
-        BRBRData = outDir + delimiter +'BDBR_calculation.xls'   ##该文件是BDBR格式文件，不要修改
-        outexcel = outDir + delimiter + 'BDBR_result.xls'           ##该文件是统计得到的BDBR数据文件
-        exceldata = xlrd.open_workbook(BRBRData, encoding_override="gbk")
-        datawt = copy(exceldata)  ##完成xlrd对象向xlwt对象转换
 	
         maxch = 70
 	spacesymbo = "-"
