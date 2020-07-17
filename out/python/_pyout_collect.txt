@@ -1,3 +1,1 @@
 filename                               total_frames | decoding times(ms)
-./stream//dec.mpeg4(anchor)                   6198              85.81     
-./stream//dec.mpeg4(ref)                      6198              86.41     

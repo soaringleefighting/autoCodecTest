@@ -28,9 +28,6 @@ import subprocess as sub
 import csv
 import codecs
 from   collections import OrderedDict
-import xlrd
-import xlwt
-from   xlutils.copy import copy
 
 space = ' '
 delimiter = '/'
@@ -153,7 +150,7 @@ def collect_data_to_excel(excelname, inputfile, anchor='1'):
     for key, value in data.items():
         csv_writer.writerow(value)
     pFile.close()
-    
+                   
 #linux下内存泄漏检查valgrind
 def perform_valgrind_data(outFileDir, Anchordeccmd='0', onlystreamname='0', Refdeccmd='0', reserve='0'):
     outmemcheckanchortxt = outFileDir + delimiter  + '__pyMemcheckAnchor.log'
@@ -208,10 +205,9 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
 	outanchorNdec = outFileDir + delimiter + Anchor_Ndec + '.txt'
 	outredNdec = outFileDir + delimiter + Reference_Ndec + '.txt'
 	outMemchecklog = outFileDir + delimiter + Anchor_memchecklog + '.log'
-    
-        outExcelData = outFileDir + delimiter +'__result.csv'   ##excel file
-	
-        maxch = 70
+        outExcelData = outFileDir + delimiter +'__result.csv'  ## excel file
+        
+	maxch = 70
 	spacesymbo = "-"
 	
 	pFileNotdec = open(outanchorNdec, 'w') #默认创建记录基准demo解码失败的文件
@@ -307,9 +303,6 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                         get_data_from_txt(filename, outreftxt, outtotal, 0)
                 ## 7.将数据结果从格式化文本写入到excel中 outtotal--->outExcelData
                     collect_data_to_excel(outExcelData, outtotal, 1)
-                ## 8. 支持将数据写入BDBR格式的excel中    
-                    collect_data_to_BDBRexcel(exceldata, datawt, outrawtxt, outexcel)
-                    
                     print("-----collect data to excel success!------")
                 ## 关闭打开的文件               
                     pFileAnchorNdec.close()

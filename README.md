@@ -13,6 +13,8 @@ This is a codecs coherence and performance test script.
 
 5>、支持gprof。 
 
+6>、支持BDBR统计分析。
+
 ## 2、支持平台
 Windows, Linux(ARM)
 
@@ -27,6 +29,10 @@ python auto_codec_test.py  ./bin/xvid_decraw  ./stream/ ./out/python  1 1 ./bin/
 
 python auto_codec_test.py  ./bin/xvid_decraw  ./stream/ ./out/python  0 1 ./bin/xvid_decraw  1
 
+python auto_data_collect.py  src  out 1   //ref
+
+python auto_data_collect.py  src  out 0   //anchor
+
 ## 4、注意事项
 
 1>、valgrind和gpof不能同时使用。
@@ -38,3 +44,5 @@ python auto_codec_test.py  ./bin/xvid_decraw  ./stream/ ./out/python  0 1 ./bin/
 2> 2020.7.6  create tag V2.0    支持valgrind和gprof分析
 
 3> 2020.7.10 create tag V2.0.1  支持对编解码数据进行数据统计(格式输出并导入excel中)
+
+4> 2020.7.17 create tag V2.0.2  auto_data_collect.py支持BDBR统计分析。
