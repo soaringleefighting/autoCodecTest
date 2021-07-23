@@ -341,7 +341,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                               #             '--frm_threads 1 --wpp_threads 1 --rc_type 0 -p 100 -g 0 -v 2 --qp', qp, '>', outrawtxt, '2>&1'])
                               cmd_raw = space.join([rawDemo, '-i', filename, '-s', input_res, '-c yuv420 -r 30 -rt idr -g 16 -ip 160 --preset faster',
 							  				'--threads 1 -v 6 -b 0 --qp', qp, '-o', outrawstr, '>', outrawtxt, '2>&1'])
-							  print cmd_raw
+		              print cmd_raw
                           ret = subprocess.call(cmd_raw, shell=True)
                           if(ret!=0):
                               print('[error]: ' + filename + ' rawDemo failed!')
