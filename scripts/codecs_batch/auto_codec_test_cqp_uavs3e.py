@@ -156,19 +156,25 @@ def get_data_from_txt_uave3e(filename, txtfile, outdatafile, anchor='1'):
 	lines = pFile.readlines() #读取文本中所有行
 	Data = {}  #dictory
 	for i in range(len(lines)):
-            if lines[i].find('bitrate') != -1:
-                bitrate = lines[i].split(':')[1].strip('\n')
-            if lines[i].find('Encoded frame count')!= -1:
-                framenum = lines[i].split('=')[1].strip('\n')
-            if lines[i].find('Total encoding time') != -1:
-                time = lines[i].split(' ')[-2].strip('\n')
+            if lines[i].find('Bit rate (kbit/s)') != -1:
+                bitrate = lines[i].split(':')[1].strip('\n').split(' ')[-1]
+                #print bitrate
+            if lines[i].find('FramesToBeEncoded')!= -1:
+                framenum = lines[i].split('=')[1].split(' ')[-2]
+	        #print framenum
+            if lines[i].find('Total encoding time for the seq.') != -1:
+                time = lines[i].split(':')[-1].split(' ')[1]
             ###TODO: 增加Y_PSNR, U_PSNR, V_PSNR的解析
-            if lines[i].find('PSNR Y(dB)') != -1:
-                Y_PSNR = lines[i].split(':')[-1].strip('\n')
-            if lines[i].find('PSNR U(dB)') != -1:
-                U_PSNR = lines[i].split(':')[-1].strip('\n')
-            if lines[i].find('PSNR V(dB)') != -1:
-                V_PSNR = lines[i].split(':')[-1].strip('\n')
+            if lines[i].find('SNR Y(dB)') != -1:
+                Y_PSNR = lines[i].split(':')[-1].strip(' ').strip('\n')
+            if lines[i].find('SNR U(dB)') != -1:
+                U_PSNR = lines[i].split(':')[-1].strip(' ').strip('\n')
+            if lines[i].find('SNR V(dB)') != -1:
+                V_PSNR = lines[i].split(':')[-1].strip(' ').strip('\n')
+                #print time
+                #print Y_PSNR
+                #print U_PSNR
+                #print V_PSNR
             
 	pFile.close()
 	pFile = open(outdatafile, 'a+')
@@ -344,7 +350,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                               # cmd for uavs3e RealTime
 							  cmd_raw = space.join([rawDemo, '-f /home/lpeng/AVS/uavs3e/bin/encoder_ra.cfg -p InputFile=', filename, '-p OutputFile=', outrawstr,
 							  '-p SourceWidth=', width, '-p SourceHeight=', height, '-p FramesToBeEncoded=', framenum,
-							  '-p SpeedLevel=6 -p IntraPeriod=100  -p RateControl=0 -p QP=', qp]) # , '>', outrawtxt, '2>&1'
+							  '-p SpeedLevel=6 -p IntraPeriod=100  -p RateControl=0 -p QP=', qp , '>', outrawtxt, '2>&1']) 
 							  print cmd_raw
                           ret = subprocess.call(cmd_raw, shell=True)
                           if(ret!=0):

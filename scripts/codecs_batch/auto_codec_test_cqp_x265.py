@@ -130,12 +130,18 @@ def get_data_from_txt_x265(filename, txtfile, outdatafile, anchor='1'):
                 U_PSNR_P    = Mean_PSNR.split(' ')[2].split('U:')[1]
                 V_PSNR_P    = Mean_PSNR.split(' ')[3].split('V:')[1]
 	        frame_numP  = lines[i].strip('\r').strip('\n').split(',')[-2].split(' ')[-1]
-	        #print frame_numP
-	        frameTotal = int(frame_numI) + int(frame_numP)
+	    if lines[i].find('x265 [info]: frame B:') != -1:
+                Mean_PSNR = lines[i].strip('\n').split('PSNR Mean:')[-1]
+                Y_PSNR_B    = Mean_PSNR.split(' ')[1].split('Y:')[1]
+                U_PSNR_B    = Mean_PSNR.split(' ')[2].split('U:')[1]
+                V_PSNR_B    = Mean_PSNR.split(' ')[3].split('V:')[1]
+                frame_numB  = lines[i].strip('\r').strip('\n').split(',')[-2].split(' ')[-1]
+	        print frame_numB
+	        frameTotal = int(frame_numI) + int(frame_numP) + int(frame_numB)
 	        #print frameTotal
-                Y_PSNR = ((float(Y_PSNR_I) * int(frame_numI)) + (float(Y_PSNR_P)*int(frame_numP)))/ frameTotal
-                U_PSNR = ((float(U_PSNR_I) * int(frame_numI)) + (float(U_PSNR_P)*int(frame_numP)))/ frameTotal
-                V_PSNR = ((float(V_PSNR_I) * int(frame_numI)) + (float(V_PSNR_P)*int(frame_numP)))/ frameTotal 
+                Y_PSNR = ((float(Y_PSNR_I) * int(frame_numI)) + (float(Y_PSNR_P)*int(frame_numP)) + (float(Y_PSNR_B)*int(frame_numB)))/ frameTotal
+                U_PSNR = ((float(U_PSNR_I) * int(frame_numI)) + (float(U_PSNR_P)*int(frame_numP)) + (float(Y_PSNR_B)*int(frame_numB)))/ frameTotal
+                V_PSNR = ((float(V_PSNR_I) * int(frame_numI)) + (float(V_PSNR_P)*int(frame_numP)) + (float(Y_PSNR_B)*int(frame_numB)))/ frameTotal 
 
 	pFile.close()
 	pFile = open(outdatafile, 'a+')
@@ -334,7 +340,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                               # cmd for x265
                               cmd_raw = space.join([rawDemo, '--input', filename, '--preset', 'veryfast', '-t', 'zerolatency', 
                                            '--psnr', '-o', outrawstr, '--input-res', input_res,
-                                           '--fps 30 --keyint 100 --qp', qp, '--no-wpp -F 1 ', '>', outrawtxt, '2>&1']) ## -b 0
+                                           '--fps 30 --keyint 100 --qp', qp, '--no-wpp -F 1  --bframes 3 --rc-lookahead 40', '>', outrawtxt, '2>&1']) ## -b 0
                               # cmd for uavs3e
                               #cmd_raw = space.join([rawDemo, '-i', filename, '--speed_level 3 --fps_num 30 --fps_den 1', 
                               #             '-o', outrawstr, '-w', width, '-h', height, '--input_bit_depth 8 --internal_bit_depth 8',
