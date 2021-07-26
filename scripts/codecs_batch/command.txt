@@ -1,7 +1,7 @@
 1、LDP_VBR配置：
 python auto_codec_test_vbr_x265.py  ~/H265/x265/build/linux/x265 /home/myshare/TestSequence/CTC/ out_x265_LDP_VBR  0 0 0 0
 
-python auto_codec_test_vbr.py ~/AV1/libaom_av1/aom_build/aomenc /home/myshare/TestSequence/CTC/  out_libaom_LDP_VBR 0 0 0 0
+python auto_codec_test_vbr_libaom.py ~/AV1/libaom_av1/aom_build/aomenc /home/myshare/TestSequence/CTC/  out_libaom_LDP_VBR 0 0 0 0
 
 python auto_codec_test_vbr_uavs3e.py ~/AVS/uavs3e/build/linux/uavs3enc /home/myshare/TestSequence/CTC/ out_uavs3e_LDP_VBR 0 0 0 0
 
@@ -19,8 +19,13 @@ uavs3e:
 python auto_codec_test_cqp_uavs3e.py ~/AVS/uavs3e/build/linux/uavs3enc /home/myshare/TestSequence/CTC/ out_uavs3e_RA_CQP 0 0 0 0
 
 vvenc:
+python auto_codec_test_cqp_vvenc.py ~/H266/vvenc/source/App/vvencapp/vvencapp /home/myshare/TestSequence/CTC/ out_vvenc_RA_CQP 0 0 0 0
 
+x264:
+python auto_codec_test_cqp_x264.py ~/H264/x264/x264 /home/myshare/TestSequence/scc/CTC/ out_x264_RA_CQP 0 0 0 0 0
 
 4、编码器命令行：
 ./uAVS3 -f bin/encoder_ra.cfg -p InputFile=../../seqs/BasketballDrive_1920x1080_50.yuv -p OutputFile=str.bin -p SourceWidth=1920 -p SourceHeight=1080 -p FrameRate=30 -p SampleBitDepth=8 -p CodingBitDepth=8 -p FramesToBeEncoded=100 -p threads-wpp=1 -p threads-frm=1 -p SpeedLevel=6 -p IntraPeriod=100 -p RateControl=0 -p QP=32
+
+
 

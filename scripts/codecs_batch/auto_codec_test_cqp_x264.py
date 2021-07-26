@@ -103,6 +103,48 @@ def make_all_dir(path):
 		return False
 
 #从文本中提取数据
+def get_data_from_txt_x264(filename, txtfile, outdatafile, anchor='1'):
+	pFile = open(txtfile, 'r')
+	lines = pFile.readlines() #读取文本中所有行
+	lineflag = 0
+	Data = {}  #dictory
+	for i in range(len(lines)):
+            if lines[i].find('encoded') != -1:
+                #print lines[i]
+	        word = lines[i].split(',')
+	        #print word
+	        lineflag = 0
+	        bitrate=word[2].strip().split(' ')[0]
+	        #print bitrate
+	        framenum=word[0].split(' ')[1]
+	        #print framenum
+                fps = word[1].strip().split(' ')[0]
+                time = float('%.3f' %(float(framenum)/float(fps)))
+                #print str(time)
+            if lines[i].find('x264 [info]: PSNR Mean') != -1:
+                Mean_PSNR = lines[i].strip().split(' ')
+                #print Mean_PSNR
+                Y_PSNR    = Mean_PSNR[4].split(':')[1]
+                U_PSNR    = Mean_PSNR[5].split(':')[1]
+                V_PSNR    = Mean_PSNR[6].split(':')[1]
+                #print Y_PSNR
+                #print U_PSNR
+                #print V_PSNR
+
+	pFile.close()
+	pFile = open(outdatafile, 'a+')
+	if(anchor==1):
+            oneline = filename + '(anchor)' + ' '*(30-len(filename)+15) + \
+		    framenum + 10*' ' + bitrate + 10*' ' + str(Y_PSNR) + 10*' ' +\
+		    str(U_PSNR) + 10*' ' + str(V_PSNR) + 10*' ' + str(time) + '\n'
+	else:
+            oneline = filename + '(ref)   ' + ' '*(30-len(filename)+10) + \
+		    Data['length(bytes) '] + ' '*12 + \
+		    Data['fps '] + ' '*5 + '\n'
+	pFile.write(oneline)
+	pFile.close()
+	print("[info]: get_data_from_txt_x264 success!")
+	
 def get_data_from_txt_x265(filename, txtfile, outdatafile, anchor='1'):
 	pFile = open(txtfile, 'r')
 	lines = pFile.readlines() #读取文本中所有行
@@ -130,12 +172,18 @@ def get_data_from_txt_x265(filename, txtfile, outdatafile, anchor='1'):
                 U_PSNR_P    = Mean_PSNR.split(' ')[2].split('U:')[1]
                 V_PSNR_P    = Mean_PSNR.split(' ')[3].split('V:')[1]
 	        frame_numP  = lines[i].strip('\r').strip('\n').split(',')[-2].split(' ')[-1]
-	        #print frame_numP
-	        frameTotal = int(frame_numI) + int(frame_numP)
+	    if lines[i].find('x265 [info]: frame B:') != -1:
+                Mean_PSNR = lines[i].strip('\n').split('PSNR Mean:')[-1]
+                Y_PSNR_B    = Mean_PSNR.split(' ')[1].split('Y:')[1]
+                U_PSNR_B    = Mean_PSNR.split(' ')[2].split('U:')[1]
+                V_PSNR_B    = Mean_PSNR.split(' ')[3].split('V:')[1]
+                frame_numB  = lines[i].strip('\r').strip('\n').split(',')[-2].split(' ')[-1]
+	        #print frame_numB
+	        frameTotal = int(frame_numI) + int(frame_numP) + int(frame_numB)
 	        #print frameTotal
-                Y_PSNR = ((float(Y_PSNR_I) * int(frame_numI)) + (float(Y_PSNR_P)*int(frame_numP)))/ frameTotal
-                U_PSNR = ((float(U_PSNR_I) * int(frame_numI)) + (float(U_PSNR_P)*int(frame_numP)))/ frameTotal
-                V_PSNR = ((float(V_PSNR_I) * int(frame_numI)) + (float(V_PSNR_P)*int(frame_numP)))/ frameTotal 
+                Y_PSNR = ((float(Y_PSNR_I) * int(frame_numI)) + (float(Y_PSNR_P)*int(frame_numP)) + (float(Y_PSNR_B)*int(frame_numB)))/ frameTotal
+                U_PSNR = ((float(U_PSNR_I) * int(frame_numI)) + (float(U_PSNR_P)*int(frame_numP)) + (float(Y_PSNR_B)*int(frame_numB)))/ frameTotal
+                V_PSNR = ((float(V_PSNR_I) * int(frame_numI)) + (float(V_PSNR_P)*int(frame_numP)) + (float(Y_PSNR_B)*int(frame_numB)))/ frameTotal 
 
 	pFile.close()
 	pFile = open(outdatafile, 'a+')
@@ -182,49 +230,7 @@ def get_data_from_txt_uave3e(filename, txtfile, outdatafile, anchor='1'):
 		    Data['fps '] + ' '*5 + '\n'
 	pFile.write(oneline)
 	pFile.close()
-        print("[info]: get_data_from_txt_uavs3e success!")
-
-def get_data_from_txt_libaom(filename, txtfile, outdatafile, anchor='1'):
-	pFile = open(txtfile, 'a+')
-	lines = pFile.readlines() #读取文本中所有行
-	lineflag = 0
-	Data = {}  #dictory
-	for i in range(len(lines)):
-            if lines[i].find('Stream 0 PSNR (Overall/Avg/Y/U/V)') != -1:
-                #print lines[i]
-	        lineflag = 1
-	    if lineflag == 1:
-	        word = lines[i].split('(Overall/Avg/Y/U/V)')[1].split('bps')[0]
-	        word = word.strip(' ').split(' ')
-	        print word
-	        lineflag = 0
-	        bitrate=float('%.3f' % (int(word[-1]) / 1024.0))  # bps-->kbps
-	        Y_PSNR = word[2]
-	        U_PSNR = word[3]
-	        V_PSNR = word[4]
-	        print bitrate
-	        print Y_PSNR
-	        print U_PSNR
-	        print V_PSNR
-	        time_framenum=lines[i].split('bps')[1].strip(' ')
-                time = int(time_framenum.split(' ')[0]) /1000.0  # ms-->sec
-                #print time
-                framenum=time_framenum.split(' ')[-2]
-                #print framenum
-
-	pFile.close()
-	pFile = open(outdatafile, 'a+')
-	if(anchor==1):
-            oneline = filename + '(anchor)' + ' '*(30-len(filename)+15) + \
-		    framenum + 10*' ' + str(bitrate) + 10*' ' + Y_PSNR + 10*' ' +\
-		    U_PSNR + 10*' ' + V_PSNR + 10*' ' + str(time) + '\n'
-	else:
-            oneline = filename + '(ref)   ' + ' '*(30-len(filename)+10) + \
-		    Data['length(bytes) '] + ' '*12 + \
-		    Data['fps '] + ' '*5 + '\n'
-	pFile.write(oneline)
-	pFile.close()
-	print("[info]: get_data_from_txt_libaom success!")
+	print("[info]: get_data_from_txt_uavs3e success!")
 	
 #collect data from formated text to excel
 count = 0
@@ -300,7 +306,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
 	if (os.path.exists(srcBinDir) == False):
 		print('[error]: the input file path is not exist')
 		return -1
-       ## 1.创建输出目录
+		## 1.创建输出目录
 	make_all_dir(outFileDir)
 	if(int(gprof) == 1):
 		make_all_dir(outFileDir + '/outgprof') #如果gprof为1,表示需要对代码进行性能分析，需要创建存储性能分析文件的目录
@@ -320,119 +326,9 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
 	    pFileRefNdec = open(outredNdec, "w")
 	    pFileMatch = open(outmatch, "w+")
 	    pFileDismatch = open(outdismatch, "w+")
-	pFileAnchorNdec = open(outanchorNdec, 'w')
-        pFileRefNdec = open(outredNdec, 'w')
-        
-        # 采用字典实现4个码率点的列表
-        vbr_bitrate= {} # 字典
-        vbr_bitrate.setdefault('Traffic', []).append('31000')
-        vbr_bitrate.setdefault('Traffic', []).append('20800')
-        vbr_bitrate.setdefault('Traffic', []).append('10700')
-        vbr_bitrate.setdefault('Traffic', []).append('5800')
-        vbr_bitrate.setdefault('PeopleOnStreet', []).append('10100')
-        vbr_bitrate.setdefault('PeopleOnStreet', []).append('8500')
-        vbr_bitrate.setdefault('PeopleOnStreet', []).append('4300')
-        vbr_bitrate.setdefault('PeopleOnStreet', []).append('2400')
-        vbr_bitrate.setdefault('Kimono1', []).append('5000')
-        vbr_bitrate.setdefault('Kimono1', []).append('3300')
-        vbr_bitrate.setdefault('Kimono1', []).append('1600')
-        vbr_bitrate.setdefault('Kimono1', []).append('800')
-        vbr_bitrate.setdefault('ParkScene', []).append('7500')
-        vbr_bitrate.setdefault('ParkScene', []).append('4400')
-        vbr_bitrate.setdefault('ParkScene', []).append('1800')
-        vbr_bitrate.setdefault('ParkScene', []).append('700')
-        vbr_bitrate.setdefault('Cactus', []).append('7600')
-        vbr_bitrate.setdefault('Cactus', []).append('4300')
-        vbr_bitrate.setdefault('Cactus', []).append('1900')
-        vbr_bitrate.setdefault('Cactus', []).append('900')
-        vbr_bitrate.setdefault('BQTerrace', []).append('14000')
-        vbr_bitrate.setdefault('BQTerrace', []).append('5100')
-        vbr_bitrate.setdefault('BQTerrace', []).append('1300')
-        vbr_bitrate.setdefault('BQTerrace', []).append('500')
-        vbr_bitrate.setdefault('BasketballDrive', []).append('8300')
-        vbr_bitrate.setdefault('BasketballDrive', []).append('5000')
-        vbr_bitrate.setdefault('BasketballDrive', []).append('2300')
-        vbr_bitrate.setdefault('BasketballDrive', []).append('1100')
-        vbr_bitrate.setdefault('RaceHorses', []).append('4400')
-        vbr_bitrate.setdefault('RaceHorses', []).append('2800')
-        vbr_bitrate.setdefault('RaceHorses', []).append('1200')
-        vbr_bitrate.setdefault('RaceHorses', []).append('500')
-        vbr_bitrate.setdefault('BQMall', []).append('1800')
-        vbr_bitrate.setdefault('BQMall', []).append('1100')
-        vbr_bitrate.setdefault('BQMall', []).append('500')
-        vbr_bitrate.setdefault('BQMall', []).append('200')
-        vbr_bitrate.setdefault('PartyScene', []).append('4700')
-        vbr_bitrate.setdefault('PartyScene', []).append('2800')
-        vbr_bitrate.setdefault('PartyScene', []).append('1100')
-        vbr_bitrate.setdefault('PartyScene', []).append('400')
-        vbr_bitrate.setdefault('BasketballDrill', []).append('2000')
-        vbr_bitrate.setdefault('BasketballDrill', []).append('1300')
-        vbr_bitrate.setdefault('BasketballDrill', []).append('600')
-        vbr_bitrate.setdefault('BasketballDrill', []).append('300')
-        vbr_bitrate.setdefault('RaceHorses', []).append('1100')
-        vbr_bitrate.setdefault('RaceHorses', []).append('800')
-        vbr_bitrate.setdefault('RaceHorses', []).append('300')
-        vbr_bitrate.setdefault('RaceHorses', []).append('100')
-        vbr_bitrate.setdefault('BQSquare', []).append('1100')
-        vbr_bitrate.setdefault('BQSquare', []).append('600')
-        vbr_bitrate.setdefault('BQSquare', []).append('200')
-        vbr_bitrate.setdefault('BQSquare', []).append('70')
-        vbr_bitrate.setdefault('BlowingBubbles', []).append('1000')
-        vbr_bitrate.setdefault('BlowingBubbles', []).append('600')
-        vbr_bitrate.setdefault('BlowingBubbles', []).append('200')
-        vbr_bitrate.setdefault('BlowingBubbles', []).append('100')
-        vbr_bitrate.setdefault('BasketballPass', []).append('900')
-        vbr_bitrate.setdefault('BasketballPass', []).append('600')
-        vbr_bitrate.setdefault('BasketballPass', []).append('300')
-        vbr_bitrate.setdefault('BasketballPass', []).append('100')
-        vbr_bitrate.setdefault('FourPeople', []).append('800')
-        vbr_bitrate.setdefault('FourPeople', []).append('500')
-        vbr_bitrate.setdefault('FourPeople', []).append('200')
-        vbr_bitrate.setdefault('FourPeople', []).append('100')
-        vbr_bitrate.setdefault('Johnny', []).append('500')
-        vbr_bitrate.setdefault('Johnny', []).append('250')
-        vbr_bitrate.setdefault('Johnny', []).append('100')
-        vbr_bitrate.setdefault('Johnny', []).append('60')
-        vbr_bitrate.setdefault('KristenAndSara', []).append('700')
-        vbr_bitrate.setdefault('KristenAndSara', []).append('400')
-        vbr_bitrate.setdefault('KristenAndSara', []).append('200')
-        vbr_bitrate.setdefault('KristenAndSara', []).append('100')
-        vbr_bitrate.setdefault('BasketballDrillText', []).append('2200')
-        vbr_bitrate.setdefault('BasketballDrillText', []).append('1500')
-        vbr_bitrate.setdefault('BasketballDrillText', []).append('700')
-        vbr_bitrate.setdefault('BasketballDrillText', []).append('300')
-        vbr_bitrate.setdefault('ChinaSpeed', []).append('5400')
-        vbr_bitrate.setdefault('ChinaSpeed', []).append('3700')
-        vbr_bitrate.setdefault('ChinaSpeed', []).append('1700')
-        vbr_bitrate.setdefault('ChinaSpeed', []).append('700')
-        vbr_bitrate.setdefault('SlideEditing', []).append('700')
-        vbr_bitrate.setdefault('SlideEditing', []).append('500')
-        vbr_bitrate.setdefault('SlideEditing', []).append('400')
-        vbr_bitrate.setdefault('SlideEditing', []).append('200')
-        vbr_bitrate.setdefault('SlideShow', []).append('1200')
-        vbr_bitrate.setdefault('SlideShow', []).append('900')
-        vbr_bitrate.setdefault('SlideShow', []).append('500')
-        vbr_bitrate.setdefault('SlideShow', []).append('300')
-        vbr_bitrate.setdefault('Chimei-inn', []).append('7600')
-        vbr_bitrate.setdefault('Chimei-inn', []).append('4800')
-        vbr_bitrate.setdefault('Chimei-inn', []).append('2300')
-        vbr_bitrate.setdefault('Chimei-inn', []).append('1200')
-        vbr_bitrate.setdefault('Girlhood', []).append('17700')
-        vbr_bitrate.setdefault('Girlhood', []).append('12000')
-        vbr_bitrate.setdefault('Girlhood', []).append('6000')
-        vbr_bitrate.setdefault('Girlhood', []).append('3200')
-        vbr_bitrate.setdefault('Beauty', []).append('58000')
-        vbr_bitrate.setdefault('Beauty', []).append('14700')
-        vbr_bitrate.setdefault('Beauty', []).append('2000')
-        vbr_bitrate.setdefault('Beauty', []).append('1000')
-        vbr_bitrate.setdefault('RaceNight', []).append('14800')
-        vbr_bitrate.setdefault('RaceNight', []).append('8500')
-        vbr_bitrate.setdefault('RaceNight', []).append('4300')
-        vbr_bitrate.setdefault('RaceNight', []).append('2400')
-
 	files = get_raw_data(srcBinDir)
 	processIdx = -1 # 处理顺序的索引
-	
+
 	## 2.遍历每个码流文件进行编码或解码
 	for filename in files: #遍历每个码流文件
                 #print filename
@@ -443,14 +339,12 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                           
                 print('\n*****processIdx******: ' + str(processIdx))
 		print('[Info] Process: ' + filename)
-		#if processIdx == 0: #只有在刚开始时才写入头数据
-                pFile = open(outtotal, 'w') #创建汇总文件，性能数据
-                #totaltitle = 'filename' + ' '*(42 - len('#filename') + 15) + 'total_frames'+ 10*' ' + 'bitrate'  + 10*' ' + 'PSNR' + 10*' ' + 'time(s)'
+		pFile = open(outtotal, 'w') #创建汇总文件，性能数据
                 totaltitle = 'filename' + ' '*(42 - len('#filename') + 15) + 'total_frames'+ 10*' ' + 'bitrate'  + 10*' ' + 'Y-PSNR' + 10*' ' +\
                              'U-PSNR' + 10*' ' + 'V-PSNR' + 10*' ' + 'time(s)'
-                pFile.writelines(totaltitle)
-                pFile.write('\n')
-                pFile.close()
+		pFile.writelines(totaltitle)
+		pFile.write('\n')
+		pFile.close()
 
 		space_num = maxch - len(filename)
 		onlystreamname = get_file_name(filename)
@@ -460,50 +354,40 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
 		#print input_res
 		width  = input_res.split('x')[0]
 		height = input_res.split('x')[1]
-		stream_name = onlystreamname.split('_')[0]
-		#print stream_name
 		#print width
 		#print height
 
-		bitrate = vbr_bitrate[stream_name]
-		#print bitrate
+	        qp_values = ['27', '30', '35', '40']
+		#qp_values = ['27', '32', '38', '45']
 
-                # VBR循环四个码率点编码
-		for br in bitrate:
-                          outrawtxt = outFileDir + delimiter + onlystreamname + '_Anchor_br' + br + '.txt' 
-                          outreftxt = outFileDir + delimiter + onlystreamname + '_Ref_br'    + br + '.txt'    
-                          outrawstr = outFileDir + delimiter + onlystreamname + '_Anchor_br' + br + '.bin' 
-                          outrefstr = outFileDir + delimiter + onlystreamname + '_Ref_br'    + br + '.bin'    
-                          outmemcheckanchortxt = outFileDir + delimiter  + '__pyMemcheckAnchor_br' + br + '.log'
-                          outmemcheckreftxt    = outFileDir + delimiter  + '__pyMemcheckRef_br'    + br + '.log'
-                          print br
+                # 循环固定QP编码
+		for qp in qp_values:
+                          outrawtxt = outFileDir + delimiter + onlystreamname + '_Anchor_qp' + qp + '.txt' 
+                          outreftxt = outFileDir + delimiter + onlystreamname + '_Ref_qp'    + qp + '.txt'    
+                          outrawstr = outFileDir + delimiter + onlystreamname + '_Anchor_qp' + qp + '.bin' 
+                          outrefstr = outFileDir + delimiter + onlystreamname + '_Ref_qp'    + qp + '.bin'    
+                          outmemcheckanchortxt = outFileDir + delimiter  + '__pyMemcheckAnchor_qp' + qp + '.log'
+                          outmemcheckreftxt    = outFileDir + delimiter  + '__pyMemcheckRef_qp'    + qp + '.log'
+
+                          pFileAnchorNdec = open(outanchorNdec, 'w')
+                          pFileRefNdec = open(outredNdec, 'w')
 
                           # 原始可执行文件编码
                           if yuvflag != '0':
                               cmd_raw = space.join([rawDemo, '--input', filename, '--preset', 'veryfast', '-t', 'zerolatency', 
                                            '--psnr', '-o', outrawstr, '--input-res', input_res,
-                                           '--fps 30 --keyint 100 --bitrate', br, '--no-wpp -F 1 -b 0', '>', outrawtxt, '2>&1'])
+                                           '--fps 30 --keyint 100 --qp', qp, '--no-wpp -F 1 -b 0', '>', outrawtxt, '2>&1'])
                               print cmd_raw
                           else:
                               # cmd for x265
                               #cmd_raw = space.join([rawDemo, '--input', filename, '--preset', 'veryfast', '-t', 'psnr', 
                               #             '--psnr', '-o', outrawstr, '--input-res', input_res,
-                              #             '--fps 30 --keyint 100 --bitrate', br, '--no-wpp -F 1 -b 0', '>', outrawtxt, '2>&1'])
-                              # cmd for uavs3e
-                              #cmd_raw = space.join([rawDemo, '-i', filename, '--speed_level 3 --fps_num 30 --fps_den 1', 
-                              #             '-o', outrawstr, '-w', width, '-h', height, '--input_bit_depth 8 --internal_bit_depth 8',
-                              #             '--frm_threads 1 --wpp_threads 1 --rc_type 0 -p 100 -g 0 -v 2 --qp', qp, '>', outrawtxt, '2>&1'])
-                              # cmd for libaom
-                              cmd_raw = space.join([rawDemo, filename, '--fps=30/1 --kf-max-dist=100  --kf-min-dist=100',
-                                            '--cpu-used=3  -u 1  --threads=1 --tune=psnr  --psnr=1 --passes=1 -v  --tile-columns=0', 
-                                            '-o', outrawstr, '-w', width, '-h', height, '--end-usage=vbr --mode-cost-upd-freq=2',
-                                            '--undershoot-pct=50 --overshoot-pct=50 --buf-sz=1000 --buf-initial-sz=500 --buf-optimal-sz=600',
-                                            '--max-intra-rate=300 --deltaq-mode=0 --enable-tpl-model=0 --enable-obmc=0 --enable-warped-motion=0',
-                                            '--coeff-cost-upd-freq=2 --enable-ref-frame-mvs=0 --mv-cost-upd-freq=2', '>', outrawtxt, '2>&1'])
-                              cmd_raw_br=''.join(['--target-bitrate=', br])
-                              cmd_raw = space.join([cmd_raw, cmd_raw_br])
-                              
-                              print cmd_raw
+                              #             '--fps 30 --keyint 100 --qp', qp, '--no-wpp -F 1  --bframes 3 --rc-lookahead 40', '>', outrawtxt, '2>&1']) ## -b 0
+                              # cmd for x264
+                              cmd_raw = space.join([rawDemo, '--preset', 'veryfast', '--tune', 'psnr', 
+                                           '--psnr', '-o', outrawstr,  filename, '--input-res', input_res,
+                                           '--fps 30 --keyint 100 --qp', qp, '--threads 1  --bframes 3', '>', outrawtxt, '2>&1']) 							  
+			      print cmd_raw
                           ret = subprocess.call(cmd_raw, shell=True)
                           if(ret!=0):
                               print('[error]: ' + filename + ' rawDemo failed!')
@@ -527,9 +411,9 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                                   pFileRefNdec.write(refDemo+'cannot dec'+filename+' '+' ret: '+ bytes(ret)+'\n')
                                   return -1
 		          ## 将性能数据结果输出到格式化文本中 outrawtxt--->outtotal
-                          get_data_from_txt_libaom(onlystreamname+'_br'+br, outrawtxt, outtotal, 1)
+                          get_data_from_txt_x264(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
                           if(refDemo != '0'):
-                              get_data_from_txt(filename, outreftxt, outtotal, 0)
+                              get_data_from_txt_x264(filename, outreftxt, outtotal, 0)
                               
                 ## 3. gprof性能分析
                 if(int(gprof)==1): #默认为0，表示不使用性能分析工具gprof
@@ -602,7 +486,7 @@ if __name__ == '__main__':
         else:
                 startIdx = 0
                 
-        #print startIdx
+        #print startIdx		
 	ret = process_encode_decode(rawDemo, srcStreamDir, outFileDir, gprof, yuvflag, refDemo, memcheckflag, startIdx)
 	if (ret!=0):
 		print("[info]: ---------Process finished!---------")

@@ -184,6 +184,38 @@ def get_data_from_txt_uave3e(filename, txtfile, outdatafile, anchor='1'):
 	pFile.close()
 	print("[info]: get_data_from_txt_uavs3e success!")
 	
+def get_data_from_txt_vvenc(filename, txtfile, outdatafile, anchor='1'):
+	pFile = open(txtfile, 'a+')
+	lines = pFile.readlines() #读取文本中所有行
+	Data = {}  #dictory
+	for i in range(len(lines)):
+            if lines[i].find('SUMMARY') != -1:
+                summary = (lines[i+2].strip().split())  #','.join(i.split())
+                #print summary
+                framenum = summary[0]
+                bitrate = summary[2]
+                Y_PSNR = summary[3]
+                U_PSNR = summary[4]
+                V_PSNR = summary[5]
+                
+            if lines[i].find('Total Time:') != -1:
+                time = lines[i].split('sec')[0].strip('\n').split(':')[-1].strip(' ')
+                #print time
+            
+	pFile.close()
+	pFile = open(outdatafile, 'a+')
+	if(anchor==1):
+            oneline = filename + '(anchor)' + ' '*(30-len(filename)+15) + \
+		    framenum + 10*' ' + str(bitrate) + 10*' ' + Y_PSNR + 10*' ' + \
+		    U_PSNR + 10*' ' + V_PSNR + 10*' ' + str(time) + '\n'
+	else:
+            oneline = filename + '(ref)   ' + ' '*(30-len(filename)+10) + \
+		    Data['length(bytes) '] + ' '*12 + \
+		    Data['fps '] + ' '*5 + '\n'
+	pFile.write(oneline)
+	pFile.close()
+	print("[info]: get_data_from_txt_vvenc success!")
+
 #collect data from formated text to excel
 count = 0
 def collect_data_to_excel(excelname, inputfile, anchor='1', processIdx=0):
@@ -340,8 +372,8 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                               #             '-o', outrawstr, '-w', width, '-h', height, '--input_bit_depth 8 --internal_bit_depth 8',
                               #             '--frm_threads 1 --wpp_threads 1 --rc_type 0 -p 100 -g 0 -v 2 --qp', qp, '>', outrawtxt, '2>&1'])
 							  # cmd for vvenc
-                              cmd_raw = space.join([rawDemo, '-i', filename, '-s', input_res, '-c yuv420 -r 30 -rt idr -g 16 -ip 160 --preset faster',
-							  				'--threads 1 -v 6 -b 3 --qp', qp, '-o', outrawstr, '>', outrawtxt, '2>&1'])
+                              cmd_raw = space.join([rawDemo, '-i', filename, '-s', input_res, '-c yuv420 -r 30 -ip 96 --preset faster',
+							  				'--threads 1 -v 6 -b 0 --qp', qp, '-o', outrawstr, '>', outrawtxt, '2>&1'])
 		              print cmd_raw
                           ret = subprocess.call(cmd_raw, shell=True)
                           if(ret!=0):
@@ -366,9 +398,9 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
                                   pFileRefNdec.write(refDemo+'cannot dec'+filename+' '+' ret: '+ bytes(ret)+'\n')
                                   return -1
 		          ## 将性能数据结果输出到格式化文本中 outrawtxt--->outtotal
-                          get_data_from_txt_x265(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
+                          get_data_from_txt_vvenc(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
                           if(refDemo != '0'):
-                              get_data_from_txt_x265(filename, outreftxt, outtotal, 0)
+                              get_data_from_txt_vvenc(filename, outreftxt, outtotal, 0)
                               
                 ## 3. gprof性能分析
                 if(int(gprof)==1): #默认为0，表示不使用性能分析工具gprof
