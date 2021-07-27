@@ -237,8 +237,8 @@ if __name__ == '__main__':
     make_all_dir(outDir)
 
     #outExcelData = outDir + delimiter +'__result.csv'
-    outExcelData = './' + 'BDBR_calculation.xls'   ##该文件是BDBR格式文件，不要修改
-    outexcel = outDir + delimiter + 'BDBR_result.xls'           ##该文件是统计得到的BDBR数据文件
+    outExcelData = './' + 'BDBR_calculation.xls'       ##该文件是BDBR格式文件，不要修改
+    outexcel = outDir + delimiter + 'BDBR_result.xls'  ##该文件是统计得到的BDBR数据文件
 
     exceldata = xlrd.open_workbook(outExcelData, encoding_override="gbk")
     datawt = copy(exceldata)  ##完成xlrd对象向xlwt对象转换
@@ -252,7 +252,7 @@ if __name__ == '__main__':
           # 1.先将数据从文本中提取到有格式文本中 collectdata--->outrawtxt
         get_data_from_txt(filename, collectdata, outrawtxt)  
           # 2.从有格式文本提取数据到excel中 outrawtxt---->outExcelData
-        #ret = collect_data_to_excel(outExcelData, outrawtxt)
+        ret = collect_data_to_excel(outExcelData, outrawtxt)
           # 3.支持从格式文本中提取数据到BDBR excel中
         if ref == '1':
             ret = collect_data_to_BDBRexcel(exceldata, datawt, outrawtxt, outexcel)
