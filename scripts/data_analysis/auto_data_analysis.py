@@ -163,12 +163,21 @@ def shuffle_info(anchor, isAnchor):
     anchordata    = csv.reader(open(anchor), quotechar="'") ## 'r'
     count_num = -1
     index_num =  0
+
+    oriBit_arr   = np.zeros(4)
+    testBit_arr  = np.zeros(4)
+    oriPSNR_arr  = np.zeros(4)
+    testPSNR_arr = np.zeros(4)
+    oriTime_arr  = np.zeros(4)
+    testTime_arr = np.zeros(4)
+
     for anchor_line in anchordata:
         count_num = count_num + 1
         if count_num == 0:
             continue
         #print anchor_line
-        seq_name=anchor_line[0].split('_')[0]
+        seq_name=anchor_line[0].split('_br')[0]
+        #print seq_name
         bitrate = anchor_line[2]
         #print bitrate
         Y_PSNR  = anchor_line[3]
@@ -188,19 +197,19 @@ def shuffle_info(anchor, isAnchor):
         if index_num == 4:
             index_num = 0
             if isAnchor == 1:
-                print seq_name, oriBit_arr
-                origBit_dict[seq_name]  = oriBit_arr
-                origPSNR_dict[seq_name] = oriPSNR_arr
-                origTime_dict[seq_name] = oriTime_arr
+                #print seq_name, oriBit_arr
+                origBit_dict[seq_name]  = oriBit_arr.copy()  #深拷贝
+                origPSNR_dict[seq_name] = oriPSNR_arr.copy()
+                origTime_dict[seq_name] = oriTime_arr.copy()
                 seqName_dict[count_num/4] = seq_name
-                print origBit_dict
+                #print origBit_dict
                 #print origPSNR_dict
                 #print origTime_dict
                 #print seqName_dict
             else:
-                testBit_dict[seq_name]  = testBit_arr
-                testPSNR_dict[seq_name] = testPSNR_arr
-                testTime_dict[seq_name] = testTime_arr
+                testBit_dict[seq_name]  = testBit_arr.copy()
+                testPSNR_dict[seq_name] = testPSNR_arr.copy()
+                testTime_dict[seq_name] = testTime_arr.copy()
                 #print testBit_dict
                 #print testPSNR_dict
                 #print testTime_dict
@@ -340,12 +349,13 @@ if __name__ == '__main__':
     outExcelData = outDir + delimiter +'__result_BDBR.csv'
     create_excel(outExcelData)
 
-    oriBit_arr   = np.zeros(4)
-    testBit_arr  = np.zeros(4)
-    oriPSNR_arr  = np.zeros(4)
-    testPSNR_arr = np.zeros(4)
-    oriTime_arr  = np.zeros(4)
-    testTime_arr = np.zeros(4)
+    pFile = open(outExcelData, 'w') #创建汇总文件，性能数据
+    #totaltitle = 'filename' + ' '*(42 - len('#filename') + 15) + 'total_frames'+ 10*' ' + 'bitrate'  + 10*' ' + 'PSNR' + 10*' ' + 'time(s)'
+    totaltitle = 'filename' + ' '*(42 - len('#filename') + 15) + 'BD-rate(PieceWise curve)(%)'  + 10*' ' + 'BD-rate(curve)(%)'  + 10*' ' \
+    + 'Delta_Y-PSNR(dB)' + 10*' ' + 'Delta_U-PSNR(dB)' + 10*' ' + 'Delta_V-PSNR(dB)' + 10*' ' + 'Delta_time(s)'
+    pFile.writelines(totaltitle)
+    pFile.write('\n')
+    pFile.close()
       
     origBit_dict  = collections.OrderedDict()  ## key: seq_name value: bitrate
     origPSNR_dict = collections.OrderedDict()
@@ -358,22 +368,69 @@ if __name__ == '__main__':
     ## 1.读取anchor数据并提取bitrate,PSNR和time信息
     shuffle_info(anchor, 1)
     ## 2.读取ref数据并提取bitrate,PSNR和time信息
-    #seq_num = shuffle_info(refer1, 0)
+    seq_num = shuffle_info(refer1, 0)
     #print seq_num
-    #print origBit_dict
 
-    for key in origBit_dict:
+    #for key in origBit_dict:
         #print seqName_dict[2]
-        print (key + ':' + str(origBit_dict[key]))
-
+        #print (key + ':' + str(origBit_dict[key]))
+    BDBRP_avg  = 0
+    BDBR_avg   = 0
+    Delta_time = 0.0
+    ## 3. 计算BD-rate(Piecewise curve)和BD-rate(curve)
     for index_num in range(1, seq_num + 1): 
-        #print seqName_dict[index_num], origBit_dict[seqName_dict[index_num]]
-        BDBR_P = computeBDRate(index_num, origPSNR_dict[seqName_dict[index_num]], origBit_dict[seqName_dict[index_num]], \
-                         testPSNR_dict[seqName_dict[index_num]], testBit_dict[seqName_dict[index_num]], True)
-        #print index_num, seqName_dict[index_num], float('%.3f'  %((BDBR_P)))
+        #print filename, origBit_dict[filename]
+        filename = seqName_dict[index_num]
+        BDBR_P = computeBDRate(index_num, origPSNR_dict[filename], origBit_dict[filename], \
+                         testPSNR_dict[filename], testBit_dict[filename], True)
+        BDBR_P = float('%.3f' %(BDBR_P * 100))
+        BDBRP_avg += BDBR_P
+        print index_num, filename, str(float('%.3f'  %((BDBR_P)))) + '%'
+        
+        BDBR = computeBDRate(index_num, origPSNR_dict[filename], origBit_dict[filename], \
+                         testPSNR_dict[filename], testBit_dict[filename], False)
+        BDBR = float('%.3f' %(BDBR * 100))
+        BDBR_avg += BDBR
+        print index_num, filename, str(float('%.3f'  %((BDBR)))) + '%'
+        
+        #print origPSNR_dict[filename]
+        #print testPSNR_dict[filename]
+        Delta_YUVPSNR = origPSNR_dict[filename] - testPSNR_dict[filename]
+        Delta_YUVPSNR[0] = float('%.3f' %Delta_YUVPSNR[0])
+        Delta_YUVPSNR[1] = float('%.3f' %Delta_YUVPSNR[1])
+        Delta_YUVPSNR[2] = float('%.3f' %Delta_YUVPSNR[2])
+        #print Delta_Y_PSNR[0]
 
+        Delta_time_list   =  ((testTime_dict[filename] - origTime_dict[filename])/ \
+            origTime_dict[filename]) *100
+        for i in Delta_time_list:
+            #print type(Delta_time)
+            Delta_time = Delta_time + i
+        Delta_time = float(Delta_time / len(Delta_time_list))
+        Delta_time = float('%.3f' %(Delta_time))
+        print str(Delta_time) + '%'
 
+        pFile = open(outExcelData, 'a+')
+        oneline = filename + ' '*(30-len(filename)+15)  \
+	        + str(BDBR_P) + 10*' ' + str(BDBR) + 10*' ' + str(Delta_YUVPSNR[0]) + 10*' ' \
+            + str(Delta_YUVPSNR[1]) + 10*' ' + str(Delta_YUVPSNR[2]) + 10*' ' + str(Delta_time) + '\n'
+        pFile.write(oneline)
+        pFile.close()
 
-    #if(ret != -1):
-    #    print("---------Process finished!---------")
-    #    os._exit(0)
+    BDBRP_avg = BDBRP_avg/seq_num
+    BDBR_avg  = BDBR_avg / seq_num
+
+    pFile = open(outExcelData, 'w') #创建汇总文件，性能数据
+    #totaltitle = 'filename' + ' '*(42 - len('#filename') + 15) + 'total_frames'+ 10*' ' + 'bitrate'  + 10*' ' + 'PSNR' + 10*' ' + 'time(s)'
+    totaltitle = 'Average' + ' '*(42 - len('#filename') + 15) + 'BD-rate(PieceWise curve)(%)'  + 10*' ' + 'BD-rate(curve)(%)'  + 10*' ' \
+    + 'Delta_Y-PSNR(dB)' + 10*' ' + 'Delta_U-PSNR(dB)' + 10*' ' + 'Delta_V-PSNR(dB)' + 10*' ' + 'Delta_time(s)'
+    pFile.writelines(totaltitle)
+    pFile.write('\n')
+    pFile.close()
+
+    ## 4.绘制率失真曲线图
+
+    ret = 0
+    if(ret != -1):
+        print("---------Process finished!---------")
+        os._exit(0)
