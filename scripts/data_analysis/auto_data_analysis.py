@@ -159,6 +159,52 @@ def collect_data_to_BDBRexcel_vs(exceldata, datawt, inputfile, outexcel):
     datawt.save(outexcel)
     return 0
 
+def shuffle_info(anchor, isAnchor):
+    anchordata    = csv.reader(open(anchor), quotechar="'") ## 'r'
+    count_num = -1
+    index_num =  0
+    for anchor_line in anchordata:
+        count_num = count_num + 1
+        if count_num == 0:
+            continue
+        #print anchor_line
+        seq_name=anchor_line[0].split('_')[0]
+        bitrate = anchor_line[2]
+        #print bitrate
+        Y_PSNR  = anchor_line[3]
+        U_PSNR  = anchor_line[4]
+        V_PSNR  = anchor_line[5]
+        time    = anchor_line[-1]
+        #print bitrate
+        if isAnchor == 1:
+            oriBit_arr[index_num]   = bitrate
+            oriPSNR_arr[index_num]  = Y_PSNR
+            oriTime_arr[index_num]  = time
+        else:
+            testBit_arr[index_num]   = bitrate
+            testPSNR_arr[index_num]  = Y_PSNR
+            testTime_arr[index_num]  = time    
+        index_num=index_num+1
+        if index_num == 4:
+            index_num = 0
+            if isAnchor == 1:
+                print seq_name, oriBit_arr
+                origBit_dict[seq_name]  = oriBit_arr
+                origPSNR_dict[seq_name] = oriPSNR_arr
+                origTime_dict[seq_name] = oriTime_arr
+                seqName_dict[count_num/4] = seq_name
+                print origBit_dict
+                #print origPSNR_dict
+                #print origTime_dict
+                #print seqName_dict
+            else:
+                testBit_dict[seq_name]  = testBit_arr
+                testPSNR_dict[seq_name] = testPSNR_arr
+                testTime_dict[seq_name] = testTime_arr
+                #print testBit_dict
+                #print testPSNR_dict
+                #print testTime_dict
+    return (count_num/4)
 
 def pchip_end(h1, h2, del1, del2):
     d = ((2*h1 + h2)*del1 - h1*del2) / (h1 + h2)
@@ -279,25 +325,53 @@ def computeBDRate(testNum, basePSNR, baseBitrate, testPSNR, testBitrate, piecewi
 ####################################main 函数入口####################################################
 if __name__ == '__main__':
     if(len(sys.argv) < 4):
-        print('Usage: auto_data_analysis.py ' + '<anchor outDir refer1> ' +  '[refer2]' + '\n')
+        print('Usage: auto_data_analysis.py ' + '<anchor outDir refer> '  + '\n')
         print("For example: auto_data_collect.py anchor_result ./out refer_result ")
         print('Notice: <> is necessary, [] is optional')
         exit()
     anchor = sys.argv[1]
     outDir = sys.argv[2]
     refer1 = sys.argv[3]
-    if (len(sys.argv) > 4):
-        refer2 = sys.argv[4]
+    #if (len(sys.argv) > 4):
+    #    refer2 = sys.argv[4]
 
     make_all_dir(outDir)
 
     outExcelData = outDir + delimiter +'__result_BDBR.csv'
     create_excel(outExcelData)
-    
-    print anchor
-    anchordata = csv.reader(open(anchor), quotechar="'") ## 'r'
-    for i in anchordata:
-        print i
+
+    oriBit_arr   = np.zeros(4)
+    testBit_arr  = np.zeros(4)
+    oriPSNR_arr  = np.zeros(4)
+    testPSNR_arr = np.zeros(4)
+    oriTime_arr  = np.zeros(4)
+    testTime_arr = np.zeros(4)
+      
+    origBit_dict  = collections.OrderedDict()  ## key: seq_name value: bitrate
+    origPSNR_dict = collections.OrderedDict()
+    testBit_dict  = collections.OrderedDict()
+    testPSNR_dict = collections.OrderedDict()
+    origTime_dict = collections.OrderedDict()
+    testTime_dict = collections.OrderedDict()
+    seqName_dict  = collections.OrderedDict()  ## key: index_num  value: seq_name
+
+    ## 1.读取anchor数据并提取bitrate,PSNR和time信息
+    shuffle_info(anchor, 1)
+    ## 2.读取ref数据并提取bitrate,PSNR和time信息
+    #seq_num = shuffle_info(refer1, 0)
+    #print seq_num
+    #print origBit_dict
+
+    for key in origBit_dict:
+        #print seqName_dict[2]
+        print (key + ':' + str(origBit_dict[key]))
+
+    for index_num in range(1, seq_num + 1): 
+        #print seqName_dict[index_num], origBit_dict[seqName_dict[index_num]]
+        BDBR_P = computeBDRate(index_num, origPSNR_dict[seqName_dict[index_num]], origBit_dict[seqName_dict[index_num]], \
+                         testPSNR_dict[seqName_dict[index_num]], testBit_dict[seqName_dict[index_num]], True)
+        #print index_num, seqName_dict[index_num], float('%.3f'  %((BDBR_P)))
+
 
 
     #if(ret != -1):
