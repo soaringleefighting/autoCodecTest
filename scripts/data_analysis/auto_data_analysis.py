@@ -374,29 +374,21 @@ def computeBDRate(testNum, basePSNR, baseBitrate, testPSNR, testBitrate, piecewi
 ####################################main 函数入口####################################################
 if __name__ == '__main__':
     if(len(sys.argv) < 4):
-        print('Usage: auto_data_analysis.py ' + '<anchor outDir refer> '  + '\n')
+        print('Usage: auto_data_analysis.py ' + '<anchor outDir refer1> ' + '[refer2 refer3]' + '\n')
         print("For example: auto_data_collect.py anchor_result ./out refer_result ")
         print('Notice: <> is necessary, [] is optional')
         exit()
     anchor = sys.argv[1]
     outDir = sys.argv[2]
     refer1 = sys.argv[3]
-    #if (len(sys.argv) > 4):
-    #    refer2 = sys.argv[4]
+    if (len(sys.argv) > 4):
+        refer2 = sys.argv[4]
+    if (len(sys.argv) > 5):
+        refer3 = sys.argv[5]
 
     make_all_dir(outDir)
 
-    outExcelData = outDir + delimiter +'__result_BDBR.csv'
-    create_excel(outExcelData)
-
-    pFile = open(outExcelData, 'w') #创建汇总文件，性能数据
-    pFile.write(codecs.BOM_UTF8)
-    csv_writer=csv.writer(pFile, dialect='excel')
-    totaltitle=['video sequence', 'BD-rate(piecewise_cubic)(%)', 'BD-rate(cubic)(%)', 'Delta_Y-PSNR(dB)', 'Delta_U-PSNR(dB)', 'Delta_V-PSNR(dB)', 'Delta_time(%)']
-    csv_writer.writerow(totaltitle)
-    #csv_writer.writerow('\n')
-    pFile.close()
-      
+    ## 保存数据分析结果的字典  
     origBit_dict   = collections.OrderedDict()  ## key: seq_name value: bitrate
     origYPSNR_dict = collections.OrderedDict()
     origUPSNR_dict = collections.OrderedDict()
@@ -419,6 +411,17 @@ if __name__ == '__main__':
     anchor_codec = anchor.split('__result')[1].split('_')[1]
     refer_codec  = refer1.split('__result')[1].split('_')[1]
     #print anchor_codec, refer_codec
+
+    ## 创建数据分析结果csv文件
+    outExcelData = outDir+delimiter+'__result_'+anchor_codec+ 'vs.'+refer_codec+'_BDBR.csv'
+    create_excel(outExcelData)
+
+    pFile = open(outExcelData, 'w') #创建汇总文件，性能数据
+    pFile.write(codecs.BOM_UTF8)
+    csv_writer=csv.writer(pFile, dialect='excel')
+    totaltitle=['video sequence', 'BD-rate(piecewise_cubic)(%)', 'BD-rate(cubic)(%)', 'Delta_Y-PSNR(dB)', 'Delta_U-PSNR(dB)', 'Delta_V-PSNR(dB)', 'Delta_time(%)']
+    csv_writer.writerow(totaltitle)
+    pFile.close()
 
     BDBRP_avg       = 0.0
     BDBR_avg        = 0.0
@@ -554,7 +557,7 @@ if __name__ == '__main__':
         if (index_num-1) % 2 == 0:
             chartColumn = 'J'
         else:
-            chartColumn = 'S'
+            chartColumn = 'T'
         sheet_result.add_chart(line, chartColumn + str(excelCurrRow + (index_num-1) * (dataVerStep+4)+2))       
     wb.save(analysis_file)
     ret = 0
