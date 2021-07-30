@@ -105,28 +105,19 @@ def collect_data_to_BDBRexcel(exceldata, datawt, inputfile, outexcel):
     data = collections.OrderedDict()  ##使用有序字典
     splitValue = lines[0].strip().split(' ')
     data[splitValue[0]] = [splitValue[0], splitValue[1], splitValue[2], splitValue[3]]
-    #print data
     sequence_name_plus_qp = splitValue[0]
     sequence_name = splitValue[0].split('_qp')[0]
-    #print sequence_name
     sequence_qp = splitValue[0].split('_qp')[1]
-    #print sequence_qp
 
-    #exceldata.sheet_names()
-    #print("sheets: " + str(exceldata.sheet_names()))
     table = exceldata.sheet_by_name('AI-Main')
     table_wt = datawt.get_sheet('AI-Main')
-    #print("Total rows: " + str(table.nrows))
-    #print("Total columns: " + str(table.ncols))
 
     ##遍历excel中每一行，存在匹配的字符串则写入对应的bitrate,Y-PSNR和EncT
     nrows = table.nrows
     for i in range(nrows):
         if type(table.col_values(2)[i]) == float:  ##将float类型转换成int类型
             qp = int(table.col_values(2)[i])
-        #print str(table.col_values(1)[i])
         if str(table.col_values(1)[i]) == sequence_name and str(qp) == sequence_qp:
-            #print i
             table_wt.write(i, 11, splitValue[1]) #write bitrate
             table_wt.write(i, 12, splitValue[2]) #write Y-PSNR
             table_wt.write(i, 15, splitValue[3]) #write EncT(s)
@@ -141,28 +132,19 @@ def collect_data_to_BDBRexcel_vs(exceldata, datawt, inputfile, outexcel):
     data = collections.OrderedDict()  ##使用有序字典
     splitValue = lines[0].strip().split(' ')
     data[splitValue[0]] = [splitValue[0], splitValue[1], splitValue[2], splitValue[3]]
-    #print data
     sequence_name_plus_qp = splitValue[0]
     sequence_name = splitValue[0].split('_qp')[0]
-    #print sequence_name
     sequence_qp = splitValue[0].split('_qp')[1]
-    #print sequence_qp
 
-    #exceldata.sheet_names()
-    #print("sheets: " + str(exceldata.sheet_names()))
     table = exceldata.sheet_by_name('AI-Main')
     table_wt = datawt.get_sheet('AI-Main')
-    #print("Total rows: " + str(table.nrows))
-    #print("Total columns: " + str(table.ncols))
 
     ##遍历excel中每一行，存在匹配的字符串则写入对应的bitrate,Y-PSNR和EncT
     nrows = table.nrows
     for i in range(nrows):
         if type(table.col_values(2)[i]) == float:  ##将float类型转换成int类型
             qp = int(table.col_values(2)[i])
-        #print str(table.col_values(1)[i])
         if str(table.col_values(1)[i]) == sequence_name and str(qp) == sequence_qp:
-            #print i
             table_wt.write(i, 3, splitValue[1]) #write bitrate
             table_wt.write(i, 4, splitValue[2]) #write Y-PSNR
             table_wt.write(i, 7, splitValue[3]) #write EncT(s)
@@ -191,8 +173,8 @@ def shuffle_info(anchor, isAnchor):
         count_num = count_num + 1
         if count_num == 0:
             continue
-        #print anchor_line
-        seq_name=anchor_line[0].split('_br')[0]
+        #seq_name=anchor_line[0].split('_br')[0]  # just for vbr mode
+        seq_name = '_'.join([anchor_line[0].split('_')[0], anchor_line[0].split('_')[1]])
         #print seq_name
         bitrate = anchor_line[2]
         #print bitrate
@@ -436,14 +418,15 @@ if __name__ == '__main__':
         Delta_UPSNR      = 0.0
         Delta_VPSNR      = 0.0
         Delta_time       = 0.0
-        #print filename, origBit_dict[filename]
+       
         filename = seqName_dict[index_num]
+        #print filename, origBit_dict[filename]
         ## 3.1 计算BD-rate
         BDBR_P = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
                          testYPSNR_dict[filename], testBit_dict[filename], True)
         BDBR_P = float('%.1f' %(BDBR_P * 100))
         BDBRP_avg += BDBR_P
-        print index_num, filename, str(float('%.1f'  %((BDBR_P)))) + '%'
+        print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%'
         
         BDBR = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
                          testYPSNR_dict[filename], testBit_dict[filename], False)
@@ -485,9 +468,8 @@ if __name__ == '__main__':
         pFile = open(outExcelData, 'a+')
         pFile.write(codecs.BOM_UTF8)
         csv_writer=csv.writer(pFile, dialect='excel')
-        oneline = filename + ' '*(30-len(filename)+15)  \
-	            + str(BDBR_P) + 10*' ' + str(BDBR) + 10*' ' + str(Delta_YPSNR) + 10*' ' \
-                + str(Delta_UPSNR) + 10*' ' + str(Delta_VPSNR) + 10*' ' + str(Delta_time) + '\n'
+        oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
+                + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + '\n'
         csv_writer.writerow(oneline.split())
         pFile.close()
 
@@ -504,11 +486,12 @@ if __name__ == '__main__':
     csv_writer=csv.writer(pFile, dialect='excel')
     average_data = 'Average' + ' ' + str(BDBRP_avg) + ' ' + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg) + ' ' + \
                     str(Delta_UPSNR_avg) + ' ' + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg)
+    print '\n', average_data
     csv_writer.writerow(average_data.split())
     pFile.close()
 
     ## 将csv文件转换成excel文件,此处为了在一个表格里面绘制率失真曲线图
-    analysis_file   = outDir+delimiter+'analysis_result.xlsx'
+    analysis_file   = outDir+delimiter+'analysis_result_'+anchor_codec+'_vs._'+refer_codec+'.xlsx'
     writer          = pd.ExcelWriter(analysis_file)
 
     csv_file1 = pd.read_csv(outExcelData, encoding='utf-8')
