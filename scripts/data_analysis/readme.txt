@@ -6,3 +6,5 @@ auto_data_analysis.py
 1、输入auto_codec_test.py脚本输出的指定格式的_result.csv统计数据；
 2、运行auto_codec_analysis.py脚本，输出对应的BDBR和率失真曲线。
 
+python auto_data_analysis.py  __result_x265_LDP_VBR.csv out __result_libaom_LDP_VBR.csv
+

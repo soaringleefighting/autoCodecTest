@@ -413,7 +413,7 @@ if __name__ == '__main__':
     #print anchor_codec, refer_codec
 
     ## 创建数据分析结果csv文件
-    outExcelData = outDir+delimiter+'__result_'+anchor_codec+ 'vs.'+refer_codec+'_BDBR.csv'
+    outExcelData = outDir+delimiter+'__result_'+anchor_codec+ '_vs._'+refer_codec+'_BDBR.csv'
     create_excel(outExcelData)
 
     pFile = open(outExcelData, 'w') #创建汇总文件，性能数据
@@ -507,7 +507,7 @@ if __name__ == '__main__':
     csv_writer.writerow(average_data.split())
     pFile.close()
 
-    ## 将csv文件转换成excel文件
+    ## 将csv文件转换成excel文件,此处为了在一个表格里面绘制率失真曲线图
     analysis_file   = outDir+delimiter+'analysis_result.xlsx'
     writer          = pd.ExcelWriter(analysis_file)
 
