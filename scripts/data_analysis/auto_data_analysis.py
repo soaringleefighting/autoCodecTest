@@ -743,15 +743,15 @@ if __name__ == '__main__':
         filename = seqName_dict[index_num] 
         line = openpyxl.chart.ScatterChart()
         line.title = filename                   #图表标题
-        line.y_axis.title = 'Bitrate (kbps)'    #y轴标题
-        line.x_axis.title = 'Y-PSNR (dB)'       #x轴标题
+        line.x_axis.title = 'Bitrate (kbps)'    #y轴标题
+        line.y_axis.title = 'Y-PSNR (dB)'       #x轴标题
 
-        line.x_axis.scaling.min = int(min(origYPSNR_dict[filename][3], testYPSNR_dict[filename][3])) - 2  # y轴的最小值
+        line.y_axis.scaling.min = int(min(origYPSNR_dict[filename][3], testYPSNR_dict[filename][3])) - 2  # y轴的最小值
         if (len(sys.argv) > 4):
-            line.x_axis.scaling.min = int(min(origYPSNR_dict[filename][3], testYPSNR_dict[filename][3],
+            line.y_axis.scaling.min = int(min(origYPSNR_dict[filename][3], testYPSNR_dict[filename][3],
                                           testYPSNR_dict2[filename][3])) - 5  # y轴的最小值
         if (len(sys.argv) > 5):
-            line.x_axis.scaling.min = int(min(origYPSNR_dict[filename][3],  testYPSNR_dict[filename][3],
+            line.y_axis.scaling.min = int(min(origYPSNR_dict[filename][3],  testYPSNR_dict[filename][3],
                                               testYPSNR_dict2[filename][3], testYPSNR_dict3[filename][3])) - 2  # y轴的最小值
             #line.x_axis.scaling.max = int(max(origYPSNR_dict[filename][0] , testYPSNR_dict[filename][0],
             #                                  testYPSNR_dict2[filename][0], testYPSNR_dict3[filename][0])) + 2  # y轴的最大值
