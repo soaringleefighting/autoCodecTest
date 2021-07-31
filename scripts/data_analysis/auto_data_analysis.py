@@ -2,17 +2,18 @@
 
 #######################################################################################
 ##脚本功能： 本脚本用于计算BD-rate，Delta_PSNR, Delta_time，并绘制率失真曲线图。
-##脚本用法： python auto_data_collect.py anchor_result ./out refer_result
-##参数说明：	anchor_result     :	  原始数据
-##             refer_result      :   测试数据
-##             ./out             :   输出结果目录
+##脚本用法： python auto_data_analysis.py anchor_result ./out refer1_result [refer2_result refer3_result]
+##参数说明：    anchor_result     :	  原始测试数据
+##            refer_result      :   对比测试数据
+##            ./out             :   输出结果目录
 ##
 ## Created by lipeng at July 10 2020
-## Version 1.0
+## Version 2.2
 ## Modified:
-## 2020.7.10 create tag V1.0
-## 2020.7.16 create tag V2.0 support BDBR collect
-## 2021.7.30 create tag V2.2 support calculate BDBR and plot RD curve
+## 2020.7.10 create tag v1.0
+## 2020.7.16 create tag v2.0 support BDBR collect
+## 2021.7.30 create tag v2.1 support calculate BDBR and plot RD curve
+## 2021.7.31 create tag v2.2 支持三路或四路编码器对比计算BD-rate和绘制率失真曲线图(绘制在一张图上)
 #######################################################################################
 import os
 import re
@@ -153,7 +154,7 @@ def collect_data_to_BDBRexcel_vs(exceldata, datawt, inputfile, outexcel):
     return 0
 
 ## 从特定格式csv文件中提取码率，PSNR和time信息
-def shuffle_info(anchor, isAnchor):
+def shuffle_info(anchor, isAnchor=1, refer_idx=0):
     anchordata    = csv.reader(open(anchor), quotechar="'") ## 'r'
     count_num = -1
     index_num =  0
@@ -182,7 +183,6 @@ def shuffle_info(anchor, isAnchor):
         U_PSNR  = anchor_line[4]
         V_PSNR  = anchor_line[5]
         time    = anchor_line[-1]
-        #print bitrate
         if isAnchor == 1:
             origBit_arr[index_num]    = bitrate
             origYPSNR_arr[index_num]  = Y_PSNR
@@ -211,14 +211,27 @@ def shuffle_info(anchor, isAnchor):
                 #print origTime_dict
                 #print seqName_dict
             else:
-                testBit_dict[seq_name]  = testBit_arr.copy()
-                testYPSNR_dict[seq_name] = testYPSNR_arr.copy()
-                testUPSNR_dict[seq_name] = testUPSNR_arr.copy()
-                testVPSNR_dict[seq_name] = testVPSNR_arr.copy()
-                testTime_dict[seq_name] = testTime_arr.copy()
-                #print testBit_dict
-                #print testYPSNR_dict
-                #print testTime_dict
+                if refer_idx == 0:
+                    testBit_dict  [seq_name] = testBit_arr.copy()
+                    testYPSNR_dict[seq_name] = testYPSNR_arr.copy()
+                    testUPSNR_dict[seq_name] = testUPSNR_arr.copy()
+                    testVPSNR_dict[seq_name] = testVPSNR_arr.copy()
+                    testTime_dict [seq_name] = testTime_arr.copy()
+                    #print testBit_dict
+                    #print testYPSNR_dict
+                    #print testTime_dict
+                elif refer_idx == 1:
+                    testBit_dict2  [seq_name] = testBit_arr.copy()
+                    testYPSNR_dict2[seq_name] = testYPSNR_arr.copy()
+                    testUPSNR_dict2[seq_name] = testUPSNR_arr.copy()
+                    testVPSNR_dict2[seq_name] = testVPSNR_arr.copy()
+                    testTime_dict2 [seq_name] = testTime_arr.copy() 
+                elif refer_idx == 2:
+                    testBit_dict3  [seq_name] = testBit_arr.copy()
+                    testYPSNR_dict3[seq_name] = testYPSNR_arr.copy()
+                    testUPSNR_dict3[seq_name] = testUPSNR_arr.copy()
+                    testVPSNR_dict3[seq_name] = testVPSNR_arr.copy()
+                    testTime_dict3 [seq_name] = testTime_arr.copy() 
     return (count_num/4)
 
 def csv_to_xlsx(csvfile, excelfile):
@@ -357,20 +370,33 @@ def computeBDRate(testNum, basePSNR, baseBitrate, testPSNR, testBitrate, piecewi
 if __name__ == '__main__':
     if(len(sys.argv) < 4):
         print('Usage: auto_data_analysis.py ' + '<anchor outDir refer1> ' + '[refer2 refer3]' + '\n')
-        print("For example: auto_data_collect.py anchor_result ./out refer_result ")
+        print("For example: auto_data_collect.py anchor_result ./out refer1_result refer2_result refer3_result")
         print('Notice: <> is necessary, [] is optional')
         exit()
+    
+    ## 1.命令行参数解析    
     anchor = sys.argv[1]
     outDir = sys.argv[2]
     refer1 = sys.argv[3]
     if (len(sys.argv) > 4):
         refer2 = sys.argv[4]
+        testBit_dict2   = collections.OrderedDict()
+        testYPSNR_dict2 = collections.OrderedDict()
+        testUPSNR_dict2 = collections.OrderedDict()
+        testVPSNR_dict2 = collections.OrderedDict()
+        testTime_dict2  = collections.OrderedDict()
     if (len(sys.argv) > 5):
         refer3 = sys.argv[5]
-
+        testBit_dict3   = collections.OrderedDict()
+        testYPSNR_dict3 = collections.OrderedDict()
+        testUPSNR_dict3 = collections.OrderedDict()
+        testVPSNR_dict3 = collections.OrderedDict()
+        testTime_dict3  = collections.OrderedDict()
+    
+    ## 2.创建输出目录
     make_all_dir(outDir)
 
-    ## 保存数据分析结果的字典  
+    ## 3.保存数据分析结果的字典  
     origBit_dict   = collections.OrderedDict()  ## key: seq_name value: bitrate
     origYPSNR_dict = collections.OrderedDict()
     origUPSNR_dict = collections.OrderedDict()
@@ -383,25 +409,48 @@ if __name__ == '__main__':
     testTime_dict  = collections.OrderedDict()
     seqName_dict   = collections.OrderedDict()  ## key: index_num  value: seq_name
 
-    ## 1.读取anchor数据并提取bitrate,PSNR和time信息
-    shuffle_info(anchor, 1)
+    ## 4.读取anchor数据并提取bitrate,PSNR和time信息
+    seq_num = shuffle_info(anchor, 1)
 
-    ## 2.读取ref数据并提取bitrate,PSNR和time信息
-    seq_num = shuffle_info(refer1, 0)
-    #print seq_num
+    ## 5.读取refer数据并提取bitrate,PSNR和time信息
+    shuffle_info(refer1, 0, 0)
 
+    if (len(sys.argv) > 4):
+        shuffle_info(refer2, 0, 1)
+
+    if (len(sys.argv) > 5):
+        shuffle_info(refer3, 0, 2)
+    
     anchor_codec = anchor.split('__result')[1].split('_')[1]
-    refer_codec  = refer1.split('__result')[1].split('_')[1]
-    #print anchor_codec, refer_codec
+    refer1_codec = refer1.split('__result')[1].split('_')[1]
+    if (len(sys.argv) > 4):
+        refer2_codec = refer2.split('__result')[1].split('_')[1]
+    if (len(sys.argv) > 5):
+        refer3_codec = refer3.split('__result')[1].split('_')[1]
+    #print anchor_codec, refer1_codec
 
-    ## 创建数据分析结果csv文件
-    outExcelData = outDir+delimiter+'__result_'+anchor_codec+ '_vs._'+refer_codec+'_BDBR.csv'
+    ## 6.创建数据分析结果csv文件
+    outExcelData = outDir+delimiter+'__result_'+anchor_codec+ '_vs._'+refer1_codec+'_BDBR.csv'
+    if (len(sys.argv) > 4):
+        outExcelData = outDir+delimiter+'__result_'+anchor_codec+ '_vs._'+refer1_codec+'_vs._'+refer2_codec+'_BDBR.csv'
+    if (len(sys.argv) > 5):
+        outExcelData = outDir+delimiter+'__result_'+anchor_codec+ '_vs._'+refer1_codec+'_vs._'+refer2_codec+'_vs._'+refer3_codec+'_BDBR.csv'
     create_excel(outExcelData)
 
     pFile = open(outExcelData, 'w') #创建汇总文件，性能数据
     pFile.write(codecs.BOM_UTF8)
     csv_writer=csv.writer(pFile, dialect='excel')
+
+    #两路对比
     totaltitle=['video sequence', 'BD-rate(piecewise_cubic)(%)', 'BD-rate(cubic)(%)', 'Delta_Y-PSNR(dB)', 'Delta_U-PSNR(dB)', 'Delta_V-PSNR(dB)', 'Delta_time(%)']
+    if (len(sys.argv) > 4):  # 三路对比
+        totaltitle=['video sequence', 'BD-rate_1(piecewise_cubic)(%)', 'BD-rate_1(cubic)(%)', 'Delta_Y-PSNR_1(dB)', 'Delta_U-PSNR_1(dB)', 'Delta_V-PSNR_1(dB)', 'Delta_time_1(%)', \
+                                      'BD-rate_2(piecewise_cubic)(%)', 'BD-rate_2(cubic)(%)', 'Delta_Y-PSNR_2(dB)', 'Delta_U-PSNR_2(dB)', 'Delta_V-PSNR_2(dB)', 'Delta_time_2(%)'  ]
+    if (len(sys.argv) > 5): # 四路对比
+        totaltitle=['video sequence', 'BD-rate_1(piecewise_cubic)(%)', 'BD-rate_1(cubic)(%)', 'Delta_Y-PSNR_1(dB)', 'Delta_U-PSNR_1(dB)', 'Delta_V-PSNR_1(dB)', 'Delta_time_1(%)', \
+                                      'BD-rate_2(piecewise_cubic)(%)', 'BD-rate_2(cubic)(%)', 'Delta_Y-PSNR_2(dB)', 'Delta_U-PSNR_2(dB)', 'Delta_V-PSNR_2(dB)', 'Delta_time_2(%)', \
+                                      'BD-rate_3(piecewise_cubic)(%)', 'BD-rate_3(cubic)(%)', 'Delta_Y-PSNR_3(dB)', 'Delta_U-PSNR_3(dB)', 'Delta_V-PSNR_3(dB)', 'Delta_time_3(%)'  ]
+
     csv_writer.writerow(totaltitle)
     pFile.close()
 
@@ -411,28 +460,77 @@ if __name__ == '__main__':
     Delta_UPSNR_avg = 0.0
     Delta_VPSNR_avg = 0.0
     Delta_time_avg  = 0.0
+    BDBRP_avg_2     = 0.0
+    BDBR_avg_2      = 0.0
+    Delta_YPSNR_avg_2 = 0.0
+    Delta_UPSNR_avg_2 = 0.0
+    Delta_VPSNR_avg_2 = 0.0
+    Delta_time_avg_2  = 0.0
+    BDBRP_avg_3     = 0.0
+    BDBR_avg_3      = 0.0
+    Delta_YPSNR_avg_3 = 0.0
+    Delta_UPSNR_avg_3 = 0.0
+    Delta_VPSNR_avg_3 = 0.0
+    Delta_time_avg_3  = 0.0
 
-    ## 3. 计算BD-rate(piecewise cubic)和BD-rate(cubic)以及Delta_PSNR和Delta_time，绘制率失真曲线图
+    ## 7. 计算BD-rate(piecewise cubic)和BD-rate(cubic)以及Delta_PSNR和Delta_time，绘制率失真曲线图
     for index_num in range(1, seq_num + 1): 
         Delta_YPSNR      = 0.0
         Delta_UPSNR      = 0.0
         Delta_VPSNR      = 0.0
         Delta_time       = 0.0
+        Delta_YPSNR_2      = 0.0
+        Delta_UPSNR_2      = 0.0
+        Delta_VPSNR_2      = 0.0
+        Delta_time_2       = 0.0
+        Delta_YPSNR_3      = 0.0
+        Delta_UPSNR_3      = 0.0
+        Delta_VPSNR_3      = 0.0
+        Delta_time_3       = 0.0
        
         filename = seqName_dict[index_num]
-        #print filename, origBit_dict[filename]
+
         ## 3.1 计算BD-rate
         BDBR_P = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
                          testYPSNR_dict[filename], testBit_dict[filename], True)
         BDBR_P = float('%.1f' %(BDBR_P * 100))
-        BDBRP_avg += BDBR_P
-        print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%'
+        
+        #print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%'
         
         BDBR = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
                          testYPSNR_dict[filename], testBit_dict[filename], False)
         BDBR = float('%.1f' %(BDBR * 100))
-        BDBR_avg += BDBR
-        #print index_num, filename, str(float('%.1f'  %((BDBR)))) + '%'
+        BDBRP_avg += BDBR_P
+        BDBR_avg  += BDBR
+        if (len(sys.argv) == 4):
+            print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%'
+        
+        if (len(sys.argv) > 4):
+            BDBR_P_2 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                         testYPSNR_dict2[filename], testBit_dict2[filename], True)
+            BDBR_P_2 = float('%.1f' %(BDBR_P_2 * 100))
+        
+            BDBR_2 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                         testYPSNR_dict2[filename], testBit_dict2[filename], False)
+            BDBR_2 = float('%.1f' %(BDBR_2 * 100))
+            BDBRP_avg_2 += BDBR_P_2
+            BDBR_avg_2  += BDBR_2
+            if(len(sys.argv) == 5):
+                print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%', \
+                      str(float('%.1f'  %((BDBR_P_2)))) + '%'
+        if (len(sys.argv) > 5):
+            BDBR_P_3 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                        testYPSNR_dict3[filename], testBit_dict3[filename], True)
+            BDBR_P_3 = float('%.1f' %(BDBR_P_3 * 100))
+        
+            BDBR_3 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                        testYPSNR_dict3[filename], testBit_dict3[filename], False)
+            BDBR_3 = float('%.1f' %(BDBR_3 * 100))
+            BDBRP_avg_3 += BDBR_P_3
+            BDBR_avg_3  += BDBR_3
+            if (len(sys.argv) == 6):
+                print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%', \
+                    str(float('%.1f'  %((BDBR_P_2)))) + '%', str(float('%.1f'  %((BDBR_P_3)))) + '%'       
         
         ## 3.2 计算Delta_YPSNR, Delta_UPSNR, Delta_VPSNR
         Delta_YPSNR_list = testYPSNR_dict[filename] - origYPSNR_dict[filename]
@@ -454,6 +552,44 @@ if __name__ == '__main__':
         Delta_UPSNR_avg += Delta_UPSNR
         Delta_VPSNR_avg += Delta_VPSNR
 
+        if (len(sys.argv) > 4):
+            Delta_YPSNR_list = testYPSNR_dict2[filename] - origYPSNR_dict[filename]
+            for i in Delta_YPSNR_list:
+                Delta_YPSNR_2 = Delta_YPSNR_2 + i
+            Delta_YPSNR_2 = float('%.3f' %(Delta_YPSNR_2 / len(Delta_YPSNR_list)))
+            
+            Delta_UPSNR_list = testUPSNR_dict2[filename] - origUPSNR_dict[filename]
+            for i in Delta_UPSNR_list:
+                Delta_UPSNR_2 = Delta_UPSNR_2 + i
+            Delta_UPSNR_2 = float('%.3f' %(Delta_UPSNR_2 / len(Delta_UPSNR_list)))
+
+            Delta_VPSNR_list = testVPSNR_dict2[filename] - origVPSNR_dict[filename]
+            for i in Delta_VPSNR_list:
+                Delta_VPSNR_2 = Delta_VPSNR_2 + i
+            Delta_VPSNR_2 = float('%.3f' %(Delta_VPSNR_2 / len(Delta_VPSNR_list)))
+
+            Delta_YPSNR_avg_2 += Delta_YPSNR_2
+            Delta_UPSNR_avg_2 += Delta_UPSNR_2
+            Delta_VPSNR_avg_2 += Delta_VPSNR_2
+        if (len(sys.argv) > 5):
+            Delta_YPSNR_list = testYPSNR_dict3[filename] - origYPSNR_dict[filename]
+            for i in Delta_YPSNR_list:
+                Delta_YPSNR_3 = Delta_YPSNR_3 + i
+            Delta_YPSNR_3 = float('%.3f' %(Delta_YPSNR_3 / len(Delta_YPSNR_list)))
+            
+            Delta_UPSNR_list = testUPSNR_dict3[filename] - origUPSNR_dict[filename]
+            for i in Delta_UPSNR_list:
+                Delta_UPSNR_3 = Delta_UPSNR_3 + i
+            Delta_UPSNR_3 = float('%.3f' %(Delta_UPSNR_3 / len(Delta_UPSNR_list)))
+
+            Delta_VPSNR_list = testVPSNR_dict3[filename] - origVPSNR_dict[filename]
+            for i in Delta_VPSNR_list:
+                Delta_VPSNR_3 = Delta_VPSNR_3 + i
+            Delta_VPSNR_3 = float('%.3f' %(Delta_VPSNR_3 / len(Delta_VPSNR_list)))
+
+            Delta_YPSNR_avg_3 += Delta_YPSNR_3
+            Delta_UPSNR_avg_3 += Delta_UPSNR_3
+            Delta_VPSNR_avg_3 += Delta_VPSNR_3
         ## 3.3 计算Delta_time
         Delta_time_list = ((testTime_dict[filename] - origTime_dict[filename])/ \
                                origTime_dict[filename]) *100
@@ -462,14 +598,45 @@ if __name__ == '__main__':
         Delta_time = float(Delta_time / len(Delta_time_list))
         Delta_time = float('%.3f' %(Delta_time))
         Delta_time_avg += Delta_time
-        #print str(Delta_time) + '%'
 
+        if (len(sys.argv) > 4):
+            Delta_time_list = ((testTime_dict2[filename] - origTime_dict[filename])/ \
+                                origTime_dict[filename]) *100
+            for i in Delta_time_list:
+                Delta_time_2 = Delta_time_2 + i
+            Delta_time_2 = float(Delta_time_2 / len(Delta_time_list))
+            Delta_time_2 = float('%.3f' %(Delta_time_2))
+            Delta_time_avg_2 += Delta_time_2           
+        if (len(sys.argv) > 5):
+            Delta_time_list = ((testTime_dict3[filename] - origTime_dict[filename])/ \
+                                origTime_dict[filename]) *100
+            for i in Delta_time_list:
+                Delta_time_3 = Delta_time_3 + i
+            Delta_time_3 = float(Delta_time_3 / len(Delta_time_list))
+            Delta_time_3 = float('%.3f' %(Delta_time_3))
+            Delta_time_avg_3 += Delta_time_3    
+        
         ## 3.5 保存数据
         pFile = open(outExcelData, 'a+')
         pFile.write(codecs.BOM_UTF8)
         csv_writer=csv.writer(pFile, dialect='excel')
+
+        # 两路对比
         oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
                 + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + '\n'
+        if (len(sys.argv) > 4):  # 三路对比
+            oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
+                    + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + ' '      \
+                    + str(BDBR_P_2) + ' ' + str(BDBR_2) + ' ' + str(Delta_YPSNR_2) + ' '           \
+                    + str(Delta_UPSNR_2) + ' ' + str(Delta_VPSNR_2) + ' ' + str(Delta_time_2) + '\n'    
+        if (len(sys.argv) > 5): # 四路对比
+            oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
+                    + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + ' '      \
+                    + str(BDBR_P_2) + ' ' + str(BDBR_2) + ' ' + str(Delta_YPSNR_2) + ' '           \
+                    + str(Delta_UPSNR_2) + ' ' + str(Delta_VPSNR_2) + ' ' + str(Delta_time_2) + ' '\
+                    + str(BDBR_P_3) + ' ' + str(BDBR_3) + ' ' + str(Delta_YPSNR_3) + ' '           \
+                    + str(Delta_UPSNR_3) + ' ' + str(Delta_VPSNR_3) + ' ' + str(Delta_time_3) + '\n'
+
         csv_writer.writerow(oneline.split())
         pFile.close()
 
@@ -481,18 +648,67 @@ if __name__ == '__main__':
     Delta_VPSNR_avg = float('%.3f' %(Delta_VPSNR_avg / seq_num))
     Delta_time_avg  = float('%.3f' %(Delta_time_avg  / seq_num))
 
+    if (len(sys.argv) > 4):
+        BDBRP_avg_2       = float('%.1f' %(BDBRP_avg_2   / seq_num))
+        BDBR_avg_2        = float('%.1f' %(BDBR_avg_2    / seq_num))
+        Delta_YPSNR_avg_2 = float('%.3f' %(Delta_YPSNR_avg_2 / seq_num))
+        Delta_UPSNR_avg_2 = float('%.3f' %(Delta_UPSNR_avg_2 / seq_num))
+        Delta_VPSNR_avg_2 = float('%.3f' %(Delta_VPSNR_avg_2 / seq_num))
+        Delta_time_avg_2  = float('%.3f' %(Delta_time_avg_2  / seq_num))
+    if (len(sys.argv) > 5):
+        BDBRP_avg_3       = float('%.1f' %(BDBRP_avg_3   / seq_num))
+        BDBR_avg_3        = float('%.1f' %(BDBR_avg_3    / seq_num))
+        Delta_YPSNR_avg_3 = float('%.3f' %(Delta_YPSNR_avg_3 / seq_num))
+        Delta_UPSNR_avg_3 = float('%.3f' %(Delta_UPSNR_avg_3 / seq_num))
+        Delta_VPSNR_avg_3 = float('%.3f' %(Delta_VPSNR_avg_3 / seq_num))
+        Delta_time_avg_3  = float('%.3f' %(Delta_time_avg_3  / seq_num))   
     pFile = open(outExcelData, 'a+') #创建汇总文件，性能数据
     pFile.write(codecs.BOM_UTF8)
     csv_writer=csv.writer(pFile, dialect='excel')
-    average_data = 'Average' + ' ' + str(BDBRP_avg) + ' ' + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg) + ' ' + \
-                    str(Delta_UPSNR_avg) + ' ' + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg)
-    print '\n', average_data
+
+    average_data = 'Average:\n' + str(BDBRP_avg) + ' ' + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg)  \
+                 + ' ' + str(Delta_UPSNR_avg) + ' ' + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg)
+    average_data_show = 'Average:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
+                + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg) + ' ' + str(Delta_UPSNR_avg) + ' '            \
+                + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg)
+    if (len(sys.argv) > 4):
+        average_data = 'Average:\n' + str(BDBRP_avg) + ' ' + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg)   \
+                    + ' ' + str(Delta_UPSNR_avg) + ' ' + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg) \
+                    +  '\n' + str(BDBRP_avg_2) + ' ' + str(BDBR_avg_2) + ' ' + str(Delta_YPSNR_avg_2)     \
+                    + ' '+str(Delta_UPSNR_avg_2) + ' ' + str(Delta_VPSNR_avg_2) + ' ' + str(Delta_time_avg_2)
+        average_data_show = 'Average:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
+                    + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg) + ' ' + str(Delta_UPSNR_avg) + ' '       \
+                    + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg) +  '\n' + anchor_codec + ' vs. '   \
+                    + refer2_codec + ': ' + str(BDBRP_avg_2) + ' ' + str(BDBR_avg_2) + ' '                \
+                    + str(Delta_YPSNR_avg_2) + ' '+str(Delta_UPSNR_avg_2)+' ' + str(Delta_VPSNR_avg_2)    \
+                    + ' ' + str(Delta_time_avg_2)    
+    if (len(sys.argv) > 5):
+        average_data = 'Average:\n' + str(BDBRP_avg) + ' ' + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg)     \
+                    + ' ' + str(Delta_UPSNR_avg) + ' ' + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg)   \
+                    + ' ' + str(BDBRP_avg_2) + ' ' + str(BDBR_avg_2) + ' ' + str(Delta_YPSNR_avg_2) + '\n'  \
+                    +  str(Delta_UPSNR_avg_2) + ' ' + str(Delta_VPSNR_avg_2) + ' ' + str(Delta_time_avg_2)  \
+                    + '\n' + str(BDBRP_avg_3) + ' ' + str(BDBR_avg_3) + ' ' + str(Delta_YPSNR_avg_3) + ' '  \
+                    + str(Delta_UPSNR_avg_3) + ' ' + str(Delta_VPSNR_avg_3) + ' ' + str(Delta_time_avg_3)  
+        average_data_show = 'Average:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
+                    + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg) + ' ' + str(Delta_UPSNR_avg) + ' '       \
+                    + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg) +  '\n' + anchor_codec + ' vs. '   \
+                    + refer2_codec + ': ' + str(BDBRP_avg_2) + ' ' + str(BDBR_avg_2) + ' '                \
+                    + str(Delta_YPSNR_avg_2) + ' '+str(Delta_UPSNR_avg_2)+' ' + str(Delta_VPSNR_avg_2)    \
+                    + ' ' + str(Delta_time_avg_2) + '\n' + anchor_codec + ' vs. ' + refer3_codec + ': '   \
+                    + str(BDBRP_avg_3) + ' ' + str(BDBR_avg_3) + ' ' + str(Delta_YPSNR_avg_3) + ' '       \
+                    + str(Delta_UPSNR_avg_3) + ' ' + str(Delta_VPSNR_avg_3) + ' ' + str(Delta_time_avg_3)                                               
+    print '\n', average_data_show
     csv_writer.writerow(average_data.split())
     pFile.close()
 
     ## 将csv文件转换成excel文件,此处为了在一个表格里面绘制率失真曲线图
-    analysis_file   = outDir+delimiter+'analysis_result_'+anchor_codec+'_vs._'+refer_codec+'.xlsx'
-    writer          = pd.ExcelWriter(analysis_file)
+    analysis_file = outDir+delimiter+'analysis_result_'+anchor_codec+'_vs._'+refer1_codec+'.xlsx'
+    if (len(sys.argv) > 4):
+        analysis_file = outDir+delimiter+'analysis_result_'+anchor_codec+ '_vs._'+refer1_codec+'_vs._'+refer2_codec+'.xlsx'
+    if (len(sys.argv) > 5):
+        analysis_file = outDir+delimiter+'analysis_result_'+anchor_codec+ '_vs._'+refer1_codec+'_vs._'+refer2_codec+'_vs._'+refer3_codec+'.xlsx'
+
+    writer    = pd.ExcelWriter(analysis_file)
 
     csv_file1 = pd.read_csv(outExcelData, encoding='utf-8')
     csv_file1.to_excel(writer, sheet_name='result')
@@ -501,15 +717,25 @@ if __name__ == '__main__':
     csv_file2.to_excel(writer, sheet_name='anchor_data')
 
     csv_file3 = pd.read_csv(refer1, encoding='utf-8')
-    csv_file3.to_excel(writer, sheet_name='refer_data')
+    csv_file3.to_excel(writer, sheet_name='refer1_data')
+    if (len(sys.argv) > 4):
+        csv_file4 = pd.read_csv(refer2, encoding='utf-8')
+        csv_file4.to_excel(writer, sheet_name='refer2_data') 
+    if (len(sys.argv) > 5):
+        csv_file5 = pd.read_csv(refer3, encoding='utf-8')
+        csv_file5.to_excel(writer, sheet_name='refer3_data') 
     writer.save()
 
     wb = load_workbook(analysis_file)
     #print wb.get_sheet_names()
     sheet_result = wb.get_sheet_by_name('result')  # 获得当前正在显示的sheet
     sheet_anchor = wb.get_sheet_by_name('anchor_data')  # 获得当前正在显示的sheet
-    sheet_refer  = wb.get_sheet_by_name('refer_data')  # 获得当前正在显示的sheet  
-    
+    sheet_refer  = wb.get_sheet_by_name('refer1_data')  # 获得当前正在显示的sheet  
+    if (len(sys.argv) > 4):
+        sheet_refer2  = wb.get_sheet_by_name('refer2_data')  # 获得当前正在显示的sheet        
+    if (len(sys.argv) > 5):
+        sheet_refer3  = wb.get_sheet_by_name('refer3_data')  # 获得当前正在显示的sheet   
+
     excelCurrRow = 2
     dataVerStep  = 4
     ## 4 绘制率失真曲线图
@@ -517,14 +743,21 @@ if __name__ == '__main__':
         filename = seqName_dict[index_num] 
         line = openpyxl.chart.ScatterChart()
         line.title = filename                   #图表标题
-        line.y_axis.title = 'Y-PSNR (dB)'       #y轴标题
-        line.x_axis.title = 'Bitrate (kbps)'    #x轴标题
-        line.y_axis.scaling.min = int(min(origYPSNR_dict[filename][3], testYPSNR_dict[filename][3])) - 5  # y轴的最小值
-        #print line.y_axis.scaling.min
+        line.y_axis.title = 'Bitrate (kbps)'    #y轴标题
+        line.x_axis.title = 'Y-PSNR (dB)'       #x轴标题
 
+        line.x_axis.scaling.min = int(min(origYPSNR_dict[filename][3], testYPSNR_dict[filename][3])) - 2  # y轴的最小值
+        if (len(sys.argv) > 4):
+            line.x_axis.scaling.min = int(min(origYPSNR_dict[filename][3], testYPSNR_dict[filename][3],
+                                          testYPSNR_dict2[filename][3])) - 5  # y轴的最小值
+        if (len(sys.argv) > 5):
+            line.x_axis.scaling.min = int(min(origYPSNR_dict[filename][3],  testYPSNR_dict[filename][3],
+                                              testYPSNR_dict2[filename][3], testYPSNR_dict3[filename][3])) - 2  # y轴的最小值
+            #line.x_axis.scaling.max = int(max(origYPSNR_dict[filename][0] , testYPSNR_dict[filename][0],
+            #                                  testYPSNR_dict2[filename][0], testYPSNR_dict3[filename][0])) + 2  # y轴的最大值
+        
         oriXdata = Reference(sheet_anchor, min_col=4, min_row=excelCurrRow + (index_num-1) * dataVerStep, max_row=excelCurrRow + (index_num-1) * dataVerStep+3)
         oriYdata = Reference(sheet_anchor, min_col=5, min_row=excelCurrRow + (index_num-1) * dataVerStep, max_row=excelCurrRow + (index_num-1) * dataVerStep+3)
-        #print oriXdata, oriYdata
         series = Series(oriYdata, oriXdata, title=anchor_codec)
         series.marker.symbol = 'circle'
         series.smooth = True
@@ -532,17 +765,48 @@ if __name__ == '__main__':
 
         testXdata = Reference(sheet_refer, min_col=4, min_row=excelCurrRow + (index_num-1) * dataVerStep, max_row=excelCurrRow + (index_num-1) * dataVerStep+3)
         testYdata = Reference(sheet_refer, min_col=5, min_row=excelCurrRow + (index_num-1) * dataVerStep, max_row=excelCurrRow + (index_num-1) * dataVerStep+3)
-        series = Series(testYdata, testXdata, title=refer_codec)
+        series = Series(testYdata, testXdata, title=refer1_codec)
         series.marker.symbol = 'circle'
         series.smooth = True
         line.series.append(series)
 
+        if (len(sys.argv) > 4):
+            testXdata = Reference(sheet_refer2, min_col=4, min_row=excelCurrRow + (index_num-1) * dataVerStep, max_row=excelCurrRow + (index_num-1) * dataVerStep+3)
+            testYdata = Reference(sheet_refer2, min_col=5, min_row=excelCurrRow + (index_num-1) * dataVerStep, max_row=excelCurrRow + (index_num-1) * dataVerStep+3)
+            series = Series(testYdata, testXdata, title=refer2_codec)
+            series.marker.symbol = 'circle'
+            series.smooth = True
+            line.series.append(series)
+
+        if (len(sys.argv) > 5):
+            testXdata = Reference(sheet_refer3, min_col=4, min_row=excelCurrRow + (index_num-1) * dataVerStep, max_row=excelCurrRow + (index_num-1) * dataVerStep+3)
+            testYdata = Reference(sheet_refer3, min_col=5, min_row=excelCurrRow + (index_num-1) * dataVerStep, max_row=excelCurrRow + (index_num-1) * dataVerStep+3)
+            series = Series(testYdata, testXdata, title=refer3_codec)
+            series.marker.symbol = 'circle'
+            series.smooth = True
+            line.series.append(series)
+
+        # 两路对比
         if (index_num-1) % 2 == 0:
             chartColumn = 'J'
         else:
             chartColumn = 'T'
+        # 三路对比
+        if (len(sys.argv) > 4):
+            if (index_num-1) % 2 == 0:
+                chartColumn = 'P'
+            else:
+                chartColumn = 'Z'
+        # 四路对比
+        if (len(sys.argv) > 5):
+            if (index_num-1) % 2 == 0:
+                chartColumn = 'V'
+            else:
+                chartColumn = 'AF'          
         sheet_result.add_chart(line, chartColumn + str(excelCurrRow + (index_num-1) * (dataVerStep+4)+2))       
+    # 保存分析结果文件
     wb.save(analysis_file)
+    
     ret = 0
     if(ret != -1):
         print("---------Process finished!---------")
