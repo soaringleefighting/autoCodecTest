@@ -668,7 +668,7 @@ if __name__ == '__main__':
 
     average_data = 'Average:\n' + str(BDBRP_avg) + ' ' + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg)  \
                  + ' ' + str(Delta_UPSNR_avg) + ' ' + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg)
-    average_data_show = 'Average:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
+    average_data_show = 'Summary:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
                 + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg) + ' ' + str(Delta_UPSNR_avg) + ' '            \
                 + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg)
     if (len(sys.argv) > 4):
@@ -676,7 +676,7 @@ if __name__ == '__main__':
                     + ' ' + str(Delta_UPSNR_avg) + ' ' + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg) \
                     +  '\n' + str(BDBRP_avg_2) + ' ' + str(BDBR_avg_2) + ' ' + str(Delta_YPSNR_avg_2)     \
                     + ' '+str(Delta_UPSNR_avg_2) + ' ' + str(Delta_VPSNR_avg_2) + ' ' + str(Delta_time_avg_2)
-        average_data_show = 'Average:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
+        average_data_show = 'Summary:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
                     + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg) + ' ' + str(Delta_UPSNR_avg) + ' '       \
                     + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg) +  '\n' + anchor_codec + ' vs. '   \
                     + refer2_codec + ': ' + str(BDBRP_avg_2) + ' ' + str(BDBR_avg_2) + ' '                \
@@ -689,7 +689,7 @@ if __name__ == '__main__':
                     +  str(Delta_UPSNR_avg_2) + ' ' + str(Delta_VPSNR_avg_2) + ' ' + str(Delta_time_avg_2)  \
                     + '\n' + str(BDBRP_avg_3) + ' ' + str(BDBR_avg_3) + ' ' + str(Delta_YPSNR_avg_3) + ' '  \
                     + str(Delta_UPSNR_avg_3) + ' ' + str(Delta_VPSNR_avg_3) + ' ' + str(Delta_time_avg_3)  
-        average_data_show = 'Average:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
+        average_data_show = 'Summary:\n' + anchor_codec + ' vs. ' + refer1_codec + ': ' + str(BDBRP_avg) + ' ' \
                     + str(BDBR_avg) + ' ' + str(Delta_YPSNR_avg) + ' ' + str(Delta_UPSNR_avg) + ' '       \
                     + str(Delta_VPSNR_avg) + ' ' + str(Delta_time_avg) +  '\n' + anchor_codec + ' vs. '   \
                     + refer2_codec + ': ' + str(BDBRP_avg_2) + ' ' + str(BDBR_avg_2) + ' '                \

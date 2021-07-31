@@ -54,3 +54,6 @@ python auto_data_analysis.py result/__result_x264_vbr.csv out result/__result_x2
 -  2020.7.17  tag V2.0.2  支持简单的BDBR统计分析。
 
 -  2021.7.30  tag V2.1     支持计算BDBR和绘制率失真曲线图。
+
+## 6、效果图
+
