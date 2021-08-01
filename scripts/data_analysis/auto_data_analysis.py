@@ -42,7 +42,7 @@ from openpyxl.chart import (
 )
 from openpyxl import load_workbook
 
-space = ' '
+space     = ' '
 delimiter = '/'
 
 reload(sys)
@@ -159,16 +159,16 @@ def shuffle_info(anchor, isAnchor=1, refer_idx=0):
     count_num = -1
     index_num =  0
 
-    origBit_arr   = np.zeros(4)
-    testBit_arr  = np.zeros(4)
+    origBit_arr    = np.zeros(4)
+    testBit_arr    = np.zeros(4)
     origYPSNR_arr  = np.zeros(4)
-    testYPSNR_arr = np.zeros(4)
+    testYPSNR_arr  = np.zeros(4)
     origUPSNR_arr  = np.zeros(4)
-    testUPSNR_arr = np.zeros(4)
+    testUPSNR_arr  = np.zeros(4)
     origVPSNR_arr  = np.zeros(4)
-    testVPSNR_arr = np.zeros(4)
-    origTime_arr  = np.zeros(4)
-    testTime_arr = np.zeros(4)
+    testVPSNR_arr  = np.zeros(4)
+    origTime_arr   = np.zeros(4)
+    testTime_arr   = np.zeros(4)
 
     for anchor_line in anchordata:
         count_num = count_num + 1
@@ -176,9 +176,7 @@ def shuffle_info(anchor, isAnchor=1, refer_idx=0):
             continue
         #seq_name=anchor_line[0].split('_br')[0]  # just for vbr mode
         seq_name = '_'.join([anchor_line[0].split('_')[0], anchor_line[0].split('_')[1]])
-        #print seq_name
         bitrate = anchor_line[2]
-        #print bitrate
         Y_PSNR  = anchor_line[3]
         U_PSNR  = anchor_line[4]
         V_PSNR  = anchor_line[5]
@@ -365,12 +363,188 @@ def computeBDRate(testNum, basePSNR, baseBitrate, testPSNR, testBitrate, piecewi
     return meanDiff
 
 
+def ComputeBDBR_PSNR_Time(index_num):
+    Delta_YPSNR        = 0.0
+    Delta_UPSNR        = 0.0
+    Delta_VPSNR        = 0.0
+    Delta_time         = 0.0
+    Delta_YPSNR_2      = 0.0
+    Delta_UPSNR_2      = 0.0
+    Delta_VPSNR_2      = 0.0
+    Delta_time_2       = 0.0
+    Delta_YPSNR_3      = 0.0
+    Delta_UPSNR_3      = 0.0
+    Delta_VPSNR_3      = 0.0
+    Delta_time_3       = 0.0    
+    
+    global BDBRP_avg    
+    global BDBR_avg       
+    global Delta_YPSNR_avg 
+    global Delta_UPSNR_avg 
+    global Delta_VPSNR_avg
+    global Delta_time_avg 
+    global BDBRP_avg_2    
+    global BDBR_avg_2  
+    global Delta_YPSNR_avg_2
+    global Delta_UPSNR_avg_2
+    global Delta_VPSNR_avg_2 
+    global Delta_time_avg_2
+    global BDBRP_avg_3     
+    global BDBR_avg_3        
+    global Delta_YPSNR_avg_3
+    global Delta_UPSNR_avg_3
+    global Delta_VPSNR_avg_3
+    global Delta_time_avg_3
+
+    ## 1.计算BD-rate
+    BDBR_P = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                        testYPSNR_dict[filename], testBit_dict[filename], True)
+    BDBR_P = float('%.1f' %(BDBR_P * 100))
+
+    #print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%'
+
+    BDBR = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                        testYPSNR_dict[filename], testBit_dict[filename], False)
+    BDBR = float('%.1f' %(BDBR * 100))
+    BDBRP_avg += BDBR_P
+    BDBR_avg  += BDBR
+    if (len(sys.argv) == 4):
+        print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%'
+
+    if (len(sys.argv) > 4):
+        BDBR_P_2 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                        testYPSNR_dict2[filename], testBit_dict2[filename], True)
+        BDBR_P_2 = float('%.1f' %(BDBR_P_2 * 100))
+
+        BDBR_2 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                        testYPSNR_dict2[filename], testBit_dict2[filename], False)
+        BDBR_2 = float('%.1f' %(BDBR_2 * 100))
+        BDBRP_avg_2 += BDBR_P_2
+        BDBR_avg_2  += BDBR_2
+        if(len(sys.argv) == 5):
+            print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%', \
+                    str(float('%.1f'  %((BDBR_P_2)))) + '%'
+    if (len(sys.argv) > 5):
+        BDBR_P_3 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                    testYPSNR_dict3[filename], testBit_dict3[filename], True)
+        BDBR_P_3 = float('%.1f' %(BDBR_P_3 * 100))
+
+        BDBR_3 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
+                    testYPSNR_dict3[filename], testBit_dict3[filename], False)
+        BDBR_3 = float('%.1f' %(BDBR_3 * 100))
+        BDBRP_avg_3 += BDBR_P_3
+        BDBR_avg_3  += BDBR_3
+        if (len(sys.argv) == 6):
+            print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%', \
+                str(float('%.1f'  %((BDBR_P_2)))) + '%', str(float('%.1f'  %((BDBR_P_3)))) + '%'  
+        
+    ## 2.计算Delta_YPSNR, Delta_UPSNR, Delta_VPSNR
+    Delta_YPSNR_list = testYPSNR_dict[filename] - origYPSNR_dict[filename]
+    for i in Delta_YPSNR_list:
+        Delta_YPSNR = Delta_YPSNR + i
+    Delta_YPSNR = float('%.3f' %(Delta_YPSNR / len(Delta_YPSNR_list)))
+    
+    Delta_UPSNR_list = testUPSNR_dict[filename] - origUPSNR_dict[filename]
+    for i in Delta_UPSNR_list:
+        Delta_UPSNR = Delta_UPSNR + i
+    Delta_UPSNR = float('%.3f' %(Delta_UPSNR / len(Delta_UPSNR_list)))
+
+    Delta_VPSNR_list = testVPSNR_dict[filename] - origVPSNR_dict[filename]
+    for i in Delta_VPSNR_list:
+        Delta_VPSNR = Delta_VPSNR + i
+    Delta_VPSNR = float('%.3f' %(Delta_VPSNR / len(Delta_VPSNR_list)))
+
+    Delta_YPSNR_avg += Delta_YPSNR
+    Delta_UPSNR_avg += Delta_UPSNR
+    Delta_VPSNR_avg += Delta_VPSNR
+
+    if (len(sys.argv) > 4):
+        Delta_YPSNR_list = testYPSNR_dict2[filename] - origYPSNR_dict[filename]
+        for i in Delta_YPSNR_list:
+            Delta_YPSNR_2 = Delta_YPSNR_2 + i
+        Delta_YPSNR_2 = float('%.3f' %(Delta_YPSNR_2 / len(Delta_YPSNR_list)))
+        
+        Delta_UPSNR_list = testUPSNR_dict2[filename] - origUPSNR_dict[filename]
+        for i in Delta_UPSNR_list:
+            Delta_UPSNR_2 = Delta_UPSNR_2 + i
+        Delta_UPSNR_2 = float('%.3f' %(Delta_UPSNR_2 / len(Delta_UPSNR_list)))
+
+        Delta_VPSNR_list = testVPSNR_dict2[filename] - origVPSNR_dict[filename]
+        for i in Delta_VPSNR_list:
+            Delta_VPSNR_2 = Delta_VPSNR_2 + i
+        Delta_VPSNR_2 = float('%.3f' %(Delta_VPSNR_2 / len(Delta_VPSNR_list)))
+
+        Delta_YPSNR_avg_2 += Delta_YPSNR_2
+        Delta_UPSNR_avg_2 += Delta_UPSNR_2
+        Delta_VPSNR_avg_2 += Delta_VPSNR_2
+    if (len(sys.argv) > 5):
+        Delta_YPSNR_list = testYPSNR_dict3[filename] - origYPSNR_dict[filename]
+        for i in Delta_YPSNR_list:
+            Delta_YPSNR_3 = Delta_YPSNR_3 + i
+        Delta_YPSNR_3 = float('%.3f' %(Delta_YPSNR_3 / len(Delta_YPSNR_list)))
+        
+        Delta_UPSNR_list = testUPSNR_dict3[filename] - origUPSNR_dict[filename]
+        for i in Delta_UPSNR_list:
+            Delta_UPSNR_3 = Delta_UPSNR_3 + i
+        Delta_UPSNR_3 = float('%.3f' %(Delta_UPSNR_3 / len(Delta_UPSNR_list)))
+
+        Delta_VPSNR_list = testVPSNR_dict3[filename] - origVPSNR_dict[filename]
+        for i in Delta_VPSNR_list:
+            Delta_VPSNR_3 = Delta_VPSNR_3 + i
+        Delta_VPSNR_3 = float('%.3f' %(Delta_VPSNR_3 / len(Delta_VPSNR_list)))
+
+        Delta_YPSNR_avg_3 += Delta_YPSNR_3
+        Delta_UPSNR_avg_3 += Delta_UPSNR_3
+        Delta_VPSNR_avg_3 += Delta_VPSNR_3
+    
+    ## 3.计算Delta_time
+    Delta_time_list = ((testTime_dict[filename] - origTime_dict[filename])/ \
+                            origTime_dict[filename]) *100
+    for i in Delta_time_list:
+        Delta_time = Delta_time + i
+    Delta_time = float(Delta_time / len(Delta_time_list))
+    Delta_time = float('%.3f' %(Delta_time))
+    Delta_time_avg += Delta_time
+
+    if (len(sys.argv) > 4):
+        Delta_time_list = ((testTime_dict2[filename] - origTime_dict[filename])/ \
+                            origTime_dict[filename]) *100
+        for i in Delta_time_list:
+            Delta_time_2 = Delta_time_2 + i
+        Delta_time_2 = float(Delta_time_2 / len(Delta_time_list))
+        Delta_time_2 = float('%.3f' %(Delta_time_2))
+        Delta_time_avg_2 += Delta_time_2           
+    if (len(sys.argv) > 5):
+        Delta_time_list = ((testTime_dict3[filename] - origTime_dict[filename])/ \
+                            origTime_dict[filename]) *100
+        for i in Delta_time_list:
+            Delta_time_3 = Delta_time_3 + i
+        Delta_time_3 = float(Delta_time_3 / len(Delta_time_list))
+        Delta_time_3 = float('%.3f' %(Delta_time_3))
+        Delta_time_avg_3 += Delta_time_3   
+
+    # 两路对比
+    oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
+            + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + '\n'
+    if (len(sys.argv) > 4):  # 三路对比
+        oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
+                + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + ' '      \
+                + str(BDBR_P_2) + ' ' + str(BDBR_2) + ' ' + str(Delta_YPSNR_2) + ' '           \
+                + str(Delta_UPSNR_2) + ' ' + str(Delta_VPSNR_2) + ' ' + str(Delta_time_2) + '\n'    
+    if (len(sys.argv) > 5): # 四路对比
+        oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
+                + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + ' '      \
+                + str(BDBR_P_2) + ' ' + str(BDBR_2) + ' ' + str(Delta_YPSNR_2) + ' '           \
+                + str(Delta_UPSNR_2) + ' ' + str(Delta_VPSNR_2) + ' ' + str(Delta_time_2) + ' '\
+                + str(BDBR_P_3) + ' ' + str(BDBR_3) + ' ' + str(Delta_YPSNR_3) + ' '           \
+                + str(Delta_UPSNR_3) + ' ' + str(Delta_VPSNR_3) + ' ' + str(Delta_time_3) + '\n'
+    return oneline
 
 ####################################main 函数入口####################################################
 if __name__ == '__main__':
     if(len(sys.argv) < 4):
         print('Usage: auto_data_analysis.py ' + '<anchor outDir refer1> ' + '[refer2 refer3]' + '\n')
-        print("For example: auto_data_collect.py anchor_result ./out refer1_result refer2_result refer3_result")
+        print("For example: auto_data_analysis.py anchor_result ./out refer1_result refer2_result refer3_result")
         print('Notice: <> is necessary, [] is optional')
         exit()
     
@@ -441,7 +615,7 @@ if __name__ == '__main__':
     pFile.write(codecs.BOM_UTF8)
     csv_writer=csv.writer(pFile, dialect='excel')
 
-    #两路对比
+    #写入输出结果Excel的标题，默认两路对比
     totaltitle=['video sequence', 'BD-rate(piecewise_cubic)(%)', 'BD-rate(cubic)(%)', 'Delta_Y-PSNR(dB)', 'Delta_U-PSNR(dB)', 'Delta_V-PSNR(dB)', 'Delta_time(%)']
     if (len(sys.argv) > 4):  # 三路对比
         totaltitle=['video sequence', 'BD-rate_1(piecewise_cubic)(%)', 'BD-rate_1(cubic)(%)', 'Delta_Y-PSNR_1(dB)', 'Delta_U-PSNR_1(dB)', 'Delta_V-PSNR_1(dB)', 'Delta_time_1(%)', \
@@ -450,7 +624,6 @@ if __name__ == '__main__':
         totaltitle=['video sequence', 'BD-rate_1(piecewise_cubic)(%)', 'BD-rate_1(cubic)(%)', 'Delta_Y-PSNR_1(dB)', 'Delta_U-PSNR_1(dB)', 'Delta_V-PSNR_1(dB)', 'Delta_time_1(%)', \
                                       'BD-rate_2(piecewise_cubic)(%)', 'BD-rate_2(cubic)(%)', 'Delta_Y-PSNR_2(dB)', 'Delta_U-PSNR_2(dB)', 'Delta_V-PSNR_2(dB)', 'Delta_time_2(%)', \
                                       'BD-rate_3(piecewise_cubic)(%)', 'BD-rate_3(cubic)(%)', 'Delta_Y-PSNR_3(dB)', 'Delta_U-PSNR_3(dB)', 'Delta_V-PSNR_3(dB)', 'Delta_time_3(%)'  ]
-
     csv_writer.writerow(totaltitle)
     pFile.close()
 
@@ -459,188 +632,35 @@ if __name__ == '__main__':
     Delta_YPSNR_avg = 0.0
     Delta_UPSNR_avg = 0.0
     Delta_VPSNR_avg = 0.0
-    Delta_time_avg  = 0.0
+    Delta_time_avg  = 0.0 
     BDBRP_avg_2     = 0.0
     BDBR_avg_2      = 0.0
     Delta_YPSNR_avg_2 = 0.0
     Delta_UPSNR_avg_2 = 0.0
-    Delta_VPSNR_avg_2 = 0.0
+    Delta_VPSNR_avg_2 = 0.0 
     Delta_time_avg_2  = 0.0
-    BDBRP_avg_3     = 0.0
-    BDBR_avg_3      = 0.0
+    BDBRP_avg_3       = 0.0
+    BDBR_avg_3        = 0.0
     Delta_YPSNR_avg_3 = 0.0
     Delta_UPSNR_avg_3 = 0.0
     Delta_VPSNR_avg_3 = 0.0
     Delta_time_avg_3  = 0.0
 
-    ## 7. 计算BD-rate(piecewise cubic)和BD-rate(cubic)以及Delta_PSNR和Delta_time，绘制率失真曲线图
-    for index_num in range(1, seq_num + 1): 
-        Delta_YPSNR      = 0.0
-        Delta_UPSNR      = 0.0
-        Delta_VPSNR      = 0.0
-        Delta_time       = 0.0
-        Delta_YPSNR_2      = 0.0
-        Delta_UPSNR_2      = 0.0
-        Delta_VPSNR_2      = 0.0
-        Delta_time_2       = 0.0
-        Delta_YPSNR_3      = 0.0
-        Delta_UPSNR_3      = 0.0
-        Delta_VPSNR_3      = 0.0
-        Delta_time_3       = 0.0
-       
+    ## 7. 计算BD-rate(piecewise cubic)和BD-rate(cubic)以及Delta_PSNR和Delta_time
+    for index_num in range(1, seq_num + 1):        
         filename = seqName_dict[index_num]
 
-        ## 3.1 计算BD-rate
-        BDBR_P = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
-                         testYPSNR_dict[filename], testBit_dict[filename], True)
-        BDBR_P = float('%.1f' %(BDBR_P * 100))
+        ## 7.1 计算BD-rate,DeltaPSNR和DeltaTime
+        oneline = ComputeBDBR_PSNR_Time(index_num)
         
-        #print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%'
-        
-        BDBR = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
-                         testYPSNR_dict[filename], testBit_dict[filename], False)
-        BDBR = float('%.1f' %(BDBR * 100))
-        BDBRP_avg += BDBR_P
-        BDBR_avg  += BDBR
-        if (len(sys.argv) == 4):
-            print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%'
-        
-        if (len(sys.argv) > 4):
-            BDBR_P_2 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
-                         testYPSNR_dict2[filename], testBit_dict2[filename], True)
-            BDBR_P_2 = float('%.1f' %(BDBR_P_2 * 100))
-        
-            BDBR_2 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
-                         testYPSNR_dict2[filename], testBit_dict2[filename], False)
-            BDBR_2 = float('%.1f' %(BDBR_2 * 100))
-            BDBRP_avg_2 += BDBR_P_2
-            BDBR_avg_2  += BDBR_2
-            if(len(sys.argv) == 5):
-                print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%', \
-                      str(float('%.1f'  %((BDBR_P_2)))) + '%'
-        if (len(sys.argv) > 5):
-            BDBR_P_3 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
-                        testYPSNR_dict3[filename], testBit_dict3[filename], True)
-            BDBR_P_3 = float('%.1f' %(BDBR_P_3 * 100))
-        
-            BDBR_3 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
-                        testYPSNR_dict3[filename], testBit_dict3[filename], False)
-            BDBR_3 = float('%.1f' %(BDBR_3 * 100))
-            BDBRP_avg_3 += BDBR_P_3
-            BDBR_avg_3  += BDBR_3
-            if (len(sys.argv) == 6):
-                print index_num, filename, '-'*(50-len(filename)+10), str(float('%.1f'  %((BDBR_P)))) + '%', \
-                    str(float('%.1f'  %((BDBR_P_2)))) + '%', str(float('%.1f'  %((BDBR_P_3)))) + '%'       
-        
-        ## 3.2 计算Delta_YPSNR, Delta_UPSNR, Delta_VPSNR
-        Delta_YPSNR_list = testYPSNR_dict[filename] - origYPSNR_dict[filename]
-        for i in Delta_YPSNR_list:
-            Delta_YPSNR = Delta_YPSNR + i
-        Delta_YPSNR = float('%.3f' %(Delta_YPSNR / len(Delta_YPSNR_list)))
-        
-        Delta_UPSNR_list = testUPSNR_dict[filename] - origUPSNR_dict[filename]
-        for i in Delta_UPSNR_list:
-            Delta_UPSNR = Delta_UPSNR + i
-        Delta_UPSNR = float('%.3f' %(Delta_UPSNR / len(Delta_UPSNR_list)))
-
-        Delta_VPSNR_list = testVPSNR_dict[filename] - origVPSNR_dict[filename]
-        for i in Delta_VPSNR_list:
-            Delta_VPSNR = Delta_VPSNR + i
-        Delta_VPSNR = float('%.3f' %(Delta_VPSNR / len(Delta_VPSNR_list)))
-
-        Delta_YPSNR_avg += Delta_YPSNR
-        Delta_UPSNR_avg += Delta_UPSNR
-        Delta_VPSNR_avg += Delta_VPSNR
-
-        if (len(sys.argv) > 4):
-            Delta_YPSNR_list = testYPSNR_dict2[filename] - origYPSNR_dict[filename]
-            for i in Delta_YPSNR_list:
-                Delta_YPSNR_2 = Delta_YPSNR_2 + i
-            Delta_YPSNR_2 = float('%.3f' %(Delta_YPSNR_2 / len(Delta_YPSNR_list)))
-            
-            Delta_UPSNR_list = testUPSNR_dict2[filename] - origUPSNR_dict[filename]
-            for i in Delta_UPSNR_list:
-                Delta_UPSNR_2 = Delta_UPSNR_2 + i
-            Delta_UPSNR_2 = float('%.3f' %(Delta_UPSNR_2 / len(Delta_UPSNR_list)))
-
-            Delta_VPSNR_list = testVPSNR_dict2[filename] - origVPSNR_dict[filename]
-            for i in Delta_VPSNR_list:
-                Delta_VPSNR_2 = Delta_VPSNR_2 + i
-            Delta_VPSNR_2 = float('%.3f' %(Delta_VPSNR_2 / len(Delta_VPSNR_list)))
-
-            Delta_YPSNR_avg_2 += Delta_YPSNR_2
-            Delta_UPSNR_avg_2 += Delta_UPSNR_2
-            Delta_VPSNR_avg_2 += Delta_VPSNR_2
-        if (len(sys.argv) > 5):
-            Delta_YPSNR_list = testYPSNR_dict3[filename] - origYPSNR_dict[filename]
-            for i in Delta_YPSNR_list:
-                Delta_YPSNR_3 = Delta_YPSNR_3 + i
-            Delta_YPSNR_3 = float('%.3f' %(Delta_YPSNR_3 / len(Delta_YPSNR_list)))
-            
-            Delta_UPSNR_list = testUPSNR_dict3[filename] - origUPSNR_dict[filename]
-            for i in Delta_UPSNR_list:
-                Delta_UPSNR_3 = Delta_UPSNR_3 + i
-            Delta_UPSNR_3 = float('%.3f' %(Delta_UPSNR_3 / len(Delta_UPSNR_list)))
-
-            Delta_VPSNR_list = testVPSNR_dict3[filename] - origVPSNR_dict[filename]
-            for i in Delta_VPSNR_list:
-                Delta_VPSNR_3 = Delta_VPSNR_3 + i
-            Delta_VPSNR_3 = float('%.3f' %(Delta_VPSNR_3 / len(Delta_VPSNR_list)))
-
-            Delta_YPSNR_avg_3 += Delta_YPSNR_3
-            Delta_UPSNR_avg_3 += Delta_UPSNR_3
-            Delta_VPSNR_avg_3 += Delta_VPSNR_3
-        ## 3.3 计算Delta_time
-        Delta_time_list = ((testTime_dict[filename] - origTime_dict[filename])/ \
-                               origTime_dict[filename]) *100
-        for i in Delta_time_list:
-            Delta_time = Delta_time + i
-        Delta_time = float(Delta_time / len(Delta_time_list))
-        Delta_time = float('%.3f' %(Delta_time))
-        Delta_time_avg += Delta_time
-
-        if (len(sys.argv) > 4):
-            Delta_time_list = ((testTime_dict2[filename] - origTime_dict[filename])/ \
-                                origTime_dict[filename]) *100
-            for i in Delta_time_list:
-                Delta_time_2 = Delta_time_2 + i
-            Delta_time_2 = float(Delta_time_2 / len(Delta_time_list))
-            Delta_time_2 = float('%.3f' %(Delta_time_2))
-            Delta_time_avg_2 += Delta_time_2           
-        if (len(sys.argv) > 5):
-            Delta_time_list = ((testTime_dict3[filename] - origTime_dict[filename])/ \
-                                origTime_dict[filename]) *100
-            for i in Delta_time_list:
-                Delta_time_3 = Delta_time_3 + i
-            Delta_time_3 = float(Delta_time_3 / len(Delta_time_list))
-            Delta_time_3 = float('%.3f' %(Delta_time_3))
-            Delta_time_avg_3 += Delta_time_3    
-        
-        ## 3.5 保存数据
+        ## 7.2 保存数据
         pFile = open(outExcelData, 'a+')
         pFile.write(codecs.BOM_UTF8)
         csv_writer=csv.writer(pFile, dialect='excel')
-
-        # 两路对比
-        oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
-                + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + '\n'
-        if (len(sys.argv) > 4):  # 三路对比
-            oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
-                    + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + ' '      \
-                    + str(BDBR_P_2) + ' ' + str(BDBR_2) + ' ' + str(Delta_YPSNR_2) + ' '           \
-                    + str(Delta_UPSNR_2) + ' ' + str(Delta_VPSNR_2) + ' ' + str(Delta_time_2) + '\n'    
-        if (len(sys.argv) > 5): # 四路对比
-            oneline = filename +' ' + str(BDBR_P) + ' ' + str(BDBR) + ' ' + str(Delta_YPSNR) + ' ' \
-                    + str(Delta_UPSNR) + ' ' + str(Delta_VPSNR) + ' ' + str(Delta_time) + ' '      \
-                    + str(BDBR_P_2) + ' ' + str(BDBR_2) + ' ' + str(Delta_YPSNR_2) + ' '           \
-                    + str(Delta_UPSNR_2) + ' ' + str(Delta_VPSNR_2) + ' ' + str(Delta_time_2) + ' '\
-                    + str(BDBR_P_3) + ' ' + str(BDBR_3) + ' ' + str(Delta_YPSNR_3) + ' '           \
-                    + str(Delta_UPSNR_3) + ' ' + str(Delta_VPSNR_3) + ' ' + str(Delta_time_3) + '\n'
-
         csv_writer.writerow(oneline.split())
         pFile.close()
 
-    ## 平均值
+    ## 8. 输出平均值信息
     BDBRP_avg       = float('%.1f' %(BDBRP_avg   / seq_num))
     BDBR_avg        = float('%.1f' %(BDBR_avg    / seq_num))
     Delta_YPSNR_avg = float('%.3f' %(Delta_YPSNR_avg / seq_num))
@@ -662,7 +682,7 @@ if __name__ == '__main__':
         Delta_UPSNR_avg_3 = float('%.3f' %(Delta_UPSNR_avg_3 / seq_num))
         Delta_VPSNR_avg_3 = float('%.3f' %(Delta_VPSNR_avg_3 / seq_num))
         Delta_time_avg_3  = float('%.3f' %(Delta_time_avg_3  / seq_num))   
-    pFile = open(outExcelData, 'a+') #创建汇总文件，性能数据
+    pFile = open(outExcelData, 'a+') #创建汇总文件，追加性能数据
     pFile.write(codecs.BOM_UTF8)
     csv_writer=csv.writer(pFile, dialect='excel')
 
@@ -701,7 +721,7 @@ if __name__ == '__main__':
     csv_writer.writerow(average_data.split())
     pFile.close()
 
-    ## 将csv文件转换成excel文件,此处为了在一个表格里面绘制率失真曲线图
+    ## 9. 将csv文件转换成excel文件,此处为了在一个表格里面绘制率失真曲线图
     analysis_file = outDir+delimiter+'analysis_result_'+anchor_codec+'_vs._'+refer1_codec+'.xlsx'
     if (len(sys.argv) > 4):
         analysis_file = outDir+delimiter+'analysis_result_'+anchor_codec+ '_vs._'+refer1_codec+'_vs._'+refer2_codec+'.xlsx'
@@ -738,7 +758,7 @@ if __name__ == '__main__':
 
     excelCurrRow = 2
     dataVerStep  = 4
-    ## 4 绘制率失真曲线图
+    ## 10. 绘制率失真曲线图
     for index_num in range(1, seq_num + 1):
         filename = seqName_dict[index_num] 
         line = openpyxl.chart.ScatterChart()

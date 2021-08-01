@@ -5,18 +5,18 @@ This is a codecs coherence and performance test script.
 
 1>、支持批量进行编码或解码；
 
-2>、支持对编解码的性能进行数据统计（格式输出并导入excel中）；
+2>、支持对编解码器的输出日志进行数据统计（格式输出并导入excel中）；
 
-3>、支持对编解码进行一致性验证;
+3>、支持对编解码器进行一致性/正确性验证;
 
 4>、支持对待验证编解码器进行valgrind内存检查；
 
-5>、支持待验证编解码器gprof分析。 
+5>、支持对待验证编解码器进行gprof分析。 
 
 6>、支持计算BDBR和绘制率失真曲线图。
 
 ## 2、支持平台
-Windows, Linux(ARM)
+Windows，Linux(ARM)，macOS
 
 ## 3、使用方法
 
@@ -33,11 +33,11 @@ python auto_data_collect.py  src  out 1   //ref
 
 python auto_data_collect.py  src  out 0   //anchor
 
-python auto_codec_test_vbr.py ~/H264/x264/x264 /home/myshare/TestSequence/CTC/ out_x264_test 0  0 0 0 0 15
+python auto_codec_test_vbr.py ~/H264/x264/x264 /home/myshare/TestSequence/CTC/ out_x264_test 0  0 0 0 0 15 // 编解码批处理+数据统计
 
-python auto_codec_test_cqp.py ~/H264/x264/x264 /home/myshare/TestSequence/CTC/ out_x264_test 0 0 0 0 0 10
+python auto_codec_test_cqp.py ~/H264/x264/x264 /home/myshare/TestSequence/CTC/ out_x264_test 0 0 0 0 0 10 // 编解码批处理+数据统计
 
-python auto_data_analysis.py result/__result_x264_vbr.csv out result/__result_x265_vbr.csv
+python auto_data_analysis.py result/__result_x264_vbr.csv out result/__result_x265_vbr.csv  // 计算BDBR和绘制率失真曲线图
 
 ## 4、注意事项
 
@@ -56,4 +56,4 @@ python auto_data_analysis.py result/__result_x264_vbr.csv out result/__result_x2
 -  2021.7.30  tag V2.1     支持计算BDBR和绘制率失真曲线图。
 
 ## 6、效果图
-
+![image](https://github.com/soaringleefighting/autoCodecTest/RD-curve.png)
