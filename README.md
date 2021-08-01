@@ -56,4 +56,4 @@ python auto_data_analysis.py result/__result_x264_vbr.csv out result/__result_x2
 -  2021.7.30  tag V2.1     支持计算BDBR和绘制率失真曲线图。
 
 ## 6、效果图
-![image](https://github.com/soaringleefighting/autoCodecTest/blob/master/RD-curve.png)
+![image](https://raw.githubusercontent.com/soaringleefighting/autoCodecTest/master/RD-curve.png)
