@@ -288,10 +288,10 @@ def exec_plot_wave_chart_process(outdir, bit, enclist, seq, plot_table, y_label,
 		target_avg_ratio = float('%.3f' %(data_target / data_avg))	
 		
 		print '[bitrate info]:'
-		print '	target_bitrate	: ' + str(bit)
-		print '	average_bitrate	: ' + str(data_avg)
-		print '	max_bitrate	: ' + str(data_max)
-		print '	min_bitrate	: ' + str(data_min)
+		print '	target_bitrate	: ' + str(bit) + ' kbps'
+		print '	average_bitrate	: ' + str(data_avg) + ' kbps'
+		print '	max_bitrate	: ' + str(data_max) + ' kbps'
+		print '	min_bitrate	: ' + str(data_min) + ' kbps'
 		print '	stand_deviation	: '	+ str(data_sd)
 
 		plt.plot()
@@ -616,9 +616,11 @@ if __name__ == '__main__':
 		winstep = 8
 	
 	## 2.清空文件
-	if (os.path.exists(outFileDir+delimiter+bits_summary_file) == True):
-		clear_file(outFileDir+delimiter+bits_summary_file)
-
+	if (os.path.exists(outFileDir + delimiter + bits_summary_file) == True):
+		clear_file(outFileDir + delimiter + bits_summary_file)
+	if (os.path.exists(outFileDir + delimiter + bits_summary_all)  == True):
+		clear_file(outFileDir + delimiter + bits_summary_all)
+	
 	## 3.执行批处理编解码和绘制码率波动图
 	ret = process_encode_decode(rawDemo, srcStreamDir, outFileDir, gprof, yuvflag, refDemo, memcheckflag, startIdx, winsize, winstep)
 
