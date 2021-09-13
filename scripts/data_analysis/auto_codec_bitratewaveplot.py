@@ -173,6 +173,19 @@ def cacl_avg_in_windowsize(list, winsize, winstep):
 	list_avg_str = map(lambda x:str(x), list_avg)
 	return list_avg_str
 
+
+##计算数组标准差
+def calc_standard_deviation(array):
+	sum = 0
+	for i in array:
+		sum = sum +i
+	sum_m = sum / len(array)
+	sum_d = 0
+	for j in array:
+		sum_d = sum_d + pow(j - sum_m, 2)
+	sum_d = pow(sum_d / (len(array)-1), 0.5)
+	return sum_d
+
 ##从解码输出文件中提取码率    
 def extract_bits(outdir, outtxt, keys, winsize, winstep):
 	file_out = open(outtxt, 'r+')
@@ -271,12 +284,15 @@ def exec_plot_wave_chart_process(outdir, bit, enclist, seq, plot_table, y_label,
 		data_min  		 = min(data_each)
 		data_avg  		 = float('%.3f' % data_list[-1])
 		data_target 	 = float(bit)
+		data_sd			 = float('%.3f' %(calc_standard_deviation(data_each)))
 		target_avg_ratio = float('%.3f' %(data_target / data_avg))	
 		
-		print 'target_bitrate:  ' + str(bit)
-		print 'average_bitrate: ' + str(data_avg)
-		print 'max_bitrate: '     + str(data_max)
-		print 'min_bitrate: '     + str(data_min)
+		print '[bitrate info]:'
+		print '	target_bitrate	: ' + str(bit)
+		print '	average_bitrate	: ' + str(data_avg)
+		print '	max_bitrate	: ' + str(data_max)
+		print '	min_bitrate	: ' + str(data_min)
+		print '	stand_deviation	: '	+ str(data_sd)
 
 		plt.plot()
 		#plt.style.use('ggplot') #使用'ggplot'风格美化显示的图表 ##classic #Solarize_Light2  ##print(plt.style.available)
@@ -457,7 +473,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
 		space_num = maxch - len(filename)
 		onlystreamname = get_file_name(filename)
 		#print filename
-		print onlystreamname
+		#print onlystreamname
 
 		outrawtxt = outFileDir + delimiter + onlystreamname + '_Anchordec.txt'
 		outreftxt = outFileDir + delimiter + onlystreamname + '_Refdec.txt'
