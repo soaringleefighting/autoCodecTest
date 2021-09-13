@@ -1,7 +1,7 @@
 -------------------------------------------
-SVT [version]:	SVT-AV1 Decoder Lib v0.8.7-dirty
-SVT [build]  :	GCC 7.5.0	 64 bit
-LIB Build date: Sep  9 2021 08:47:24
+SVT [version]:	SVT-AV1 Decoder Lib v0.8.6-76-g44486d23-dirty
+SVT [build]  :	GCC 4.2.1	 64 bit
+LIB Build date: Sep 12 2021 18:04:23
 -------------------------------------------
 Decoding 
 Decoding Pic: 0, frame_size: 3503

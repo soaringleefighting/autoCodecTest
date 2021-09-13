@@ -208,7 +208,7 @@ def extract_bits(outdir, outtxt, keys, winsize, winstep):
 			anchor_keys = list(keys)
 			anchor_keys[0] = 'Anchor'
 			anchor_keys.extend(data)
-			print anchor_keys
+			#print anchor_keys
 			one_line = space.join(anchor_keys)
 
 			def check_data(one_line, lines):
@@ -287,6 +287,8 @@ def exec_plot_wave_chart_process(outdir, bit, enclist, seq, plot_table, y_label,
 		data_sd			 = float('%.3f' %(calc_standard_deviation(data_each)))
 		target_avg_ratio = float('%.3f' %(data_target / data_avg))	
 		
+		#print '[Instantaneous Bitrate]: '
+		print '[Instantaneous Bitrate]: ' + str(data_each)
 		print '[bitrate info]:'
 		print '	target_bitrate	: ' + str(bit) + ' kbps'
 		print '	average_bitrate	: ' + str(data_avg) + ' kbps'
