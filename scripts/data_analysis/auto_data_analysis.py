@@ -4,8 +4,8 @@
 ##脚本功能： 本脚本用于计算BD-rate，Delta_PSNR, Delta_time，并绘制率失真曲线图。
 ##脚本用法： python auto_data_analysis.py anchor_result ./out refer1_result [refer2_result refer3_result]
 ##参数说明：    anchor_result     :	  原始测试数据
-##            refer_result      :   对比测试数据
-##            ./out             :   输出结果目录
+##             refer_result      :   对比测试数据
+##             ./out             :   输出结果目录
 ##
 ## Created by lipeng at July 10 2020
 ## Version 2.2

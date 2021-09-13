@@ -8,6 +8,7 @@
 通常使用方法：
 1、先运行批处理脚本auto_codec_test.py；
 2、再运行auto_data_analysis.py获取数据分析结果（BD-rate/PSNR/Time和率失真曲线图）。
+3、运行auto_codec_bitratewaveplot.py脚本绘制码率波动图。
 
 注意事项：
 1、auto_codec_test.py脚本中包含了auto_data_collect.py脚本的数据统计功能。
