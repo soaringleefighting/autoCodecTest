@@ -44,6 +44,7 @@ delimiter = '/'
 
 #定义输出文件
 bits_summary_file 	= "bitrate_summary.log"
+bits_summary_all    = "bitrate_summary_all.log"
 
 collect 			= '_pyout_collect'  	#性能对比输出文件夹
 cmp_match			= '_pyout_match'  		#yuv对比一致
@@ -187,7 +188,7 @@ def extract_bits(outdir, outtxt, keys, winsize, winstep):
 			#print y_bits
 	y_bits_win_avg = cacl_avg_in_windowsize(y_bits, winsize, winstep)
 	#print y_bits_win_avg
-	def write_summary_to_file(outdir, summary_file, keys, data, check):
+	def write_summary_to_file(outdir, summary_file, bits_summary_all, keys, data, check):
 		file = open(outdir + delimiter + summary_file, 'w+')
 		lines = file.readlines()
 		if check == 1:
@@ -211,8 +212,12 @@ def extract_bits(outdir, outtxt, keys, winsize, winstep):
 		else:
 			file.write(one_line + '\n')
 		file.close()
+
+		file = open(outdir + delimiter + bits_summary_all, 'a+')
+		file.write(one_line + '\n')
+		file.close()
     
-	write_summary_to_file(outdir, bits_summary_file, keys, y_bits_win_avg, 1)
+	write_summary_to_file(outdir, bits_summary_file, bits_summary_all, keys, y_bits_win_avg, 1)
 	file_out.close()
 
 ##从汇总文件中提取编码器的名字、序列名、码率信息
