@@ -193,10 +193,12 @@ def extract_bits(outdir, outtxt, keys, winsize, winstep):
 	line_begin = 0
 	y_bits = []
 	for i in range(len(lines)):
-		if lines[i].find('frame_size') != -1:
+		if lines[i].find('frame_size:') != -1:
 			line_begin = 1
+		else:
+			line_begin = 0
 		if line_begin == 1:
-			line_word = lines[i].split(',')[1].strip().split(':')[1]
+			line_word = lines[i].strip().split(',')[1].strip().split(':')[1]
 			y_bits.append(float(line_word)*8)  ## Byte-->bit
 			#print y_bits
 	y_bits_win_avg = cacl_avg_in_windowsize(y_bits, winsize, winstep)
@@ -491,8 +493,9 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, gprof='0', yuvflag='0'
 		if yuvflag != '0':
 		    cmd_raw = space.join([rawDemo, '-i', filename, '-o', outrawyuv, '>', outrawtxt, '2>&1'])  ##命令行参数需要根据编解码器具体修改
 		else:
-		    cmd_raw = space.join([rawDemo, '-i', filename, '>', outrawtxt, '2>&1'])
-		#print cmd_raw
+		    #cmd_raw = space.join([rawDemo, '-i', filename, '>', outrawtxt, '2>&1']) # for svt-av1 decoder
+			cmd_raw = space.join([rawDemo, filename, 'out.yuv', '>', outrawtxt, '2>&1']) # for openH264 decoder
+		print cmd_raw
 		ret = subprocess.call(cmd_raw, shell=True)
 		if(ret!=0):
 		    print(filename + ' rawDemo failed!')
