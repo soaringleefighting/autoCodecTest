@@ -41,7 +41,7 @@ python auto_codec_test_cqp.py ~/H264/x264/x264 /home/myshare/TestSequence/CTC/ o
 
 python auto_data_analysis.py result/__result_x264_vbr.csv out result/__result_x265_vbr.csv  // 计算BDBR和绘制率失真曲线图
 
-python auto_codec_bitratewaveplot.py ./bin/SvtAv1DecApp  ./out_svtav1_vbr  ./out_svtav1_vbr  0 0 0 0 0 30 10 // 绘制率失真曲线图
+python auto_codec_bitratewaveplot.py ./bin/SvtAv1DecApp  ./out_svtav1_vbr  ./out_svtav1_vbr  0 0 0 0 0 30 10 // 绘制码率波动图
 
 ## 4、注意事项
 

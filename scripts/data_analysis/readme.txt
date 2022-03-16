@@ -24,3 +24,8 @@ SVT-AV1解码：python auto_codec_bitratewaveplot.py ./bin/SvtAv1DecApp  ./out_s
 openH264解码：python auto_codec_bitratewaveplot.py ./bin/h264dec  ./out_x264_abr/  ./out_x264_abr/  0 0 0 0 0 30 10
 
 
+三、auto_data_analysis_v2.py
+
+作用：只支持两路对比，计算得到BDBR，时间差和PSNR差异。不支持绘制率失真曲线。
+
+输入：anchor和ref的统计结果在一个表格中。
