@@ -440,76 +440,76 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', gprof='0', 
 				else:
 					print('[info]: ' + filename + ' rawDemo success!')
 
-				# 参考可执行文件编码
-				if refDemo != '0':
-					if yuvflag != '0':
-						cmd_ref = space.join([refDemo, '-i', filename, '-c', 'i420', '-f', 'yuv', '-d', outrefstr, '>', outreftxt])
-					else:
-						cmd_ref = space.join([refDemo, '-i', filename, '-c', 'i420', '-f', 'yuv', '>', outreftxt])
+			# 参考可执行文件编码
+			if refDemo != '0':
+				if yuvflag != '0':
+					cmd_ref = space.join([refDemo, '-i', filename, '-c', 'i420', '-f', 'yuv', '-d', outrefstr, '>', outreftxt])
+				else:
+					cmd_ref = space.join([refDemo, '-i', filename, '-c', 'i420', '-f', 'yuv', '>', outreftxt])
 
-					ret = subprocess.call(cmd_ref, shell=True)
-					if(ret==0):
-						print('[info]: ' + filename + ' refDemo success!')
-					else:
-						print('[error]: ' + filename + ' refDemo failed!')
-						pFileRefNdec.write(refDemo+'cannot dec'+filename+' '+' ret: '+ bytes(ret)+'\n')
-						return -1
-				## 将性能数据结果输出到格式化文本中 outrawtxt--->outtotal
-				if codec == '0':
-					get_data_from_txt_x264(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
-					if(refDemo != '0'):
-						get_data_from_txt_x264(filename, outreftxt, outtotal, 0)
-				elif codec == '1':
-					get_data_from_txt_x265(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
-					if(refDemo != '0'):
-						get_data_from_txt_x265(filename, outreftxt, outtotal, 0)
-				elif codec == '2':
-					get_data_from_txt_uavs3e(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
-					if(refDemo != '0'):
-						get_data_from_txt_uavs3e(filename, outreftxt, outtotal, 0)					              
- 				elif codec == '3':
-					get_data_from_txt_vvenc(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
-					if(refDemo != '0'):
-						get_data_from_txt_vvenc(filename, outreftxt, outtotal, 0)					              
- 
-                ## 3. gprof性能分析
-                if(int(gprof)==1): #默认为0，表示不使用性能分析工具gprof
-                    cmd = space.join(['gprof', rawDemo, 'gmon.out', '>', outFileDir+'/outgprof/'+onlystreamname+'_gprof_anchor.txt'])
-                    print(cmd)
-                    subprocess.call(cmd, shell=True)
+				ret = subprocess.call(cmd_ref, shell=True)
+				if(ret==0):
+					print('[info]: ' + filename + ' refDemo success!')
+				else:
+					print('[error]: ' + filename + ' refDemo failed!')
+					pFileRefNdec.write(refDemo+'cannot dec'+filename+' '+' ret: '+ bytes(ret)+'\n')
+					return -1
+			## 将性能数据结果输出到格式化文本中 outrawtxt--->outtotal
+			if codec == '0':
+				get_data_from_txt_x264(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
+				if(refDemo != '0'):
+					get_data_from_txt_x264(filename, outreftxt, outtotal, 0)
+			elif codec == '1':
+				get_data_from_txt_x265(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
+				if(refDemo != '0'):
+					get_data_from_txt_x265(filename, outreftxt, outtotal, 0)
+			elif codec == '2':
+				get_data_from_txt_uavs3e(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
+				if(refDemo != '0'):
+					get_data_from_txt_uavs3e(filename, outreftxt, outtotal, 0)					              
+			elif codec == '3':
+				get_data_from_txt_vvenc(onlystreamname+'_qp'+qp, outrawtxt, outtotal, 1)
+				if(refDemo != '0'):
+					get_data_from_txt_vvenc(filename, outreftxt, outtotal, 0)					              
 
-                ## 4.valgrind内存检查
-                if(memcheckflag != '0'):
-                    #print cmd_ref
-                    #exit()
-                    ret = perform_valgrind_data(outFileDir, cmd_raw, filename, cmd_ref)
-                    get_data_from_log(filename, outmemcheckanchortxt, outMemchecklog)
+			## 3. gprof性能分析
+			if(int(gprof)==1): #默认为0，表示不使用性能分析工具gprof
+				cmd = space.join(['gprof', rawDemo, 'gmon.out', '>', outFileDir+'/outgprof/'+onlystreamname+'_gprof_anchor.txt'])
+				print(cmd)
+				subprocess.call(cmd, shell=True)
 
-                ## 5. 一致性比较
-                if(refDemo != '0' and int(yuvflag) != 0):
-                    ret = yuv_cmp(outrawyuv, outrefyuv)
-                    if(ret!=0):
-                        print('[info]: MATCH!')
-                        coherence= '[' + filename + ']:' + space + 'MATCH!'
-                        pFileMatch.write(coherence)
-                        pFileMatch.write('\n')
-                        os.remove(outrawyuv)
-                        os.remove(outrefyuv)
-                    else:
-                        print('[info]: DISMATCH!')
-                        coherence= '[' + filename + ']:' + space + 'DISMATCH!'
-                        pFileDismatch.write(coherence)
-                        pFileDismatch.write('\n')
+			## 4.valgrind内存检查
+			if(memcheckflag != '0'):
+				#print cmd_ref
+				#exit()
+				ret = perform_valgrind_data(outFileDir, cmd_raw, filename, cmd_ref)
+				get_data_from_log(filename, outmemcheckanchortxt, outMemchecklog)
 
-                ## 6.将数据结果从格式化文本写入到excel中 outtotal--->outExcelData
-                collect_data_to_excel(outExcelData, outtotal, 1, processIdx)
-                print("[info]: -----collect data to excel success!------")
+			## 5. 一致性比较
+			if(refDemo != '0' and int(yuvflag) != 0):
+				ret = yuv_cmp(outrawyuv, outrefyuv)
+				if(ret!=0):
+					print('[info]: MATCH!')
+					coherence= '[' + filename + ']:' + space + 'MATCH!'
+					pFileMatch.write(coherence)
+					pFileMatch.write('\n')
+					os.remove(outrawyuv)
+					os.remove(outrefyuv)
+				else:
+					print('[info]: DISMATCH!')
+					coherence= '[' + filename + ']:' + space + 'DISMATCH!'
+					pFileDismatch.write(coherence)
+					pFileDismatch.write('\n')
+
+			## 6.将数据结果从格式化文本写入到excel中 outtotal--->outExcelData
+			collect_data_to_excel(outExcelData, outtotal, 1, processIdx)
+			print("[info]: -----collect data to excel success!------")
         ## 关闭打开的文件
 	pFileAnchorNdec.close()
-        if refDemo != '0':
-            pFileMatch.close()
-            pFileDismatch.close()
-            pFileRefNdec.close()
+	if refDemo != '0':
+		pFileMatch.close()
+		pFileDismatch.close()
+		pFileRefNdec.close()
 
 
 ####################################main 函数入口####################################################
