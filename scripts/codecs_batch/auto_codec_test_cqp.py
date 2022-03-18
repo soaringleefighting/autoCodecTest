@@ -501,10 +501,10 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', gprof='0', 
 					pFileDismatch.write(coherence)
 					pFileDismatch.write('\n')
 
-			## 6.将数据结果从格式化文本写入到excel中 outtotal--->outExcelData
-			collect_data_to_excel(outExcelData, outtotal, 1, processIdx)
-			print("[info]: -----collect data to excel success!------")
-        ## 关闭打开的文件
+		## 6.将数据结果从格式化文本写入到excel中 outtotal--->outExcelData
+		collect_data_to_excel(outExcelData, outtotal, 1, processIdx)
+		print("[info]: -----collect data to excel success!------")
+	## 关闭打开的文件
 	pFileAnchorNdec.close()
 	if refDemo != '0':
 		pFileMatch.close()
