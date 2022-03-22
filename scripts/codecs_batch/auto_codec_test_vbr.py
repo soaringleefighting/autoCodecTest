@@ -620,7 +620,8 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', gprof='0', 
 
                 ## 5. 一致性比较
                 if(refDemo != '0' and int(yuvflag) != 0):
-                    ret = yuv_cmp(outrawyuv, outrefyuv)
+                    #ret = yuv_cmp(outrawyuv, outrefyuv)
+					ret = filecmp.cmp(outrawyuv, outrefyuv)
                     if(ret!=0):
                         print('[info]: MATCH!')
                         coherence= '[' + filename + ']:' + space + 'MATCH!'
