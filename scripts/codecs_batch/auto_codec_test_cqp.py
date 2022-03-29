@@ -147,6 +147,17 @@ def get_data_from_txt_x265(filename, txtfile, outdatafile, anchor='1'):
 	Y_PSNR_B   = 0
 	U_PSNR_B   = 0
 	V_PSNR_B   = 0
+
+	frame_numP = 0	# 针对只编码I帧的情况
+	Y_PSNR_P   = 0
+	U_PSNR_P   = 0
+	V_PSNR_P   = 0
+
+	frame_numI = 0
+	Y_PSNR_I   = 0
+	U_PSNR_I   = 0
+	V_PSNR_I   = 0
+
 	for i in range(len(lines)):
 		if lines[i].find('encoded') != -1:
 			word = lines[i].split(',')
@@ -395,6 +406,8 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', gprof='0', 
 			outreftxt = outFileDir + delimiter + onlystreamname + '_Ref_qp'    + qp + '.txt'    
 			outrawstr = outFileDir + delimiter + onlystreamname + '_Anchor_qp' + qp + '.bin' 
 			outrefstr = outFileDir + delimiter + onlystreamname + '_Ref_qp'    + qp + '.bin'    
+			outrawyuv = outFileDir + delimiter + onlystreamname + '_Anchor_qp' + qp + '.yuv'
+			outrefyuv = outFileDir + delimiter + onlystreamname + '_Ref_qp'    + qp + '.yuv'
 			outmemcheckanchortxt = outFileDir + delimiter  + '__pyMemcheckAnchor_qp' + qp + '.log'
 			outmemcheckreftxt    = outFileDir + delimiter  + '__pyMemcheckRef_qp'    + qp + '.log'
 
@@ -406,7 +419,6 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', gprof='0', 
 				cmd_raw = space.join([rawDemo, '--input', filename, '--preset', 'veryfast', '-t', 'zerolatency', 
 									'--psnr', '-o', outrawstr, '--input-res', input_res,
 									'--fps 30 --keyint 100 --qp', qp, '--no-wpp -F 1 -b 0', '>', outrawtxt, '2>&1'])
-				print cmd_raw
 			else:
 				# cmd for x264
 				if codec == '0':
@@ -431,14 +443,14 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', gprof='0', 
 				elif codec == '3':
 					cmd_raw = space.join([rawDemo, '-i', filename, '-s', input_res, '-c yuv420 -r 30 -ip 96 --preset faster',
 										'--threads 1 -v 6 -b 0 --qp', qp, '-o', outrawstr, '>', outrawtxt, '2>&1'])							  
-				print cmd_raw
-				ret = subprocess.call(cmd_raw, shell=True)
-				if(ret!=0):
-					print('[error]: ' + filename + ' rawDemo failed!')
-					pFileAnchorNdec.write(rawDemo+'cannot dec'+filename+' '+' ret: '+ bytes(ret)+'\n')
-					return -1
-				else:
-					print('[info]: ' + filename + ' rawDemo success!')
+			print cmd_raw
+			ret = subprocess.call(cmd_raw, shell=True)
+			if(ret!=0):
+				print('[error]: ' + filename + ' rawDemo failed!')
+				pFileAnchorNdec.write(rawDemo+'cannot dec'+filename+' '+' ret: '+ bytes(ret)+'\n')
+				return -1
+			else:
+				print('[info]: ' + filename + ' rawDemo success!')
 
 			# 参考可执行文件编码
 			if refDemo != '0':
