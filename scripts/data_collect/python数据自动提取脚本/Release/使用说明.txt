@@ -1,0 +1,5 @@
+《数据自动提取软件》README
+
+1、将所有的txt数据放入到data目录中；
+2、直接双击运行autoExtractToExcel.exe即可。
+3、输出结果存放在out目录中。
