@@ -76,34 +76,27 @@ def collect_data_to_excel(excelname, inputfile):
         #print lines
         if lines[i].find('"mac":') != -1 and i==8:
             splitValue = (lines[i].split())[0].split(",")[0].split("\"")[-2]
-            print splitValue
-            data[filename] = [filename, splitValue, 0, 0, 0, 0, 0, 0]
+            data[filename] = [filename+'\t', str(splitValue), 0, 0, 0, 0, 0, 0]
         if lines[i].find('"imei":') != -1 and i==43:
             splitValue3 = (lines[i].split())[0].split(",")[0].split("\"")[-2]
-            print splitValue3
             data[filename][3] = str(splitValue3)+'\t'
         if lines[i].find('"imsi":') != -1 and i==44:
             splitValue4 = (lines[i].split())[0].split(",")[0].split("\"")[-2]
-            print splitValue4
             data[filename][4] = str(splitValue4)+'\t'
         if lines[i].find('"iccid":') != -1 and i==45:
             splitValue2 = (lines[i].split())[0].split(",")[0].split("\"")[-2]
-            print splitValue2
             data[filename][2] = str(splitValue2)+'\t'
         if lines[i].find('"imei":') != -1 and i==95:
             splitValue5 = (lines[i].split())[0].split(",")[0].split("\"")[-2]
-            print splitValue5
             data[filename][5] = str(splitValue5)+'\t'
         if lines[i].find('"imsi":') != -1 and i==96:
             splitValue6 = (lines[i].split())[0].split(",")[0].split("\"")[-2]
-            print splitValue6
             data[filename][6] = str(splitValue6)+'\t'
         if lines[i].find('"iccid":') != -1 and i==97:
             splitValue7 = (lines[i].split())[0].split(",")[0].split("\"")[-2]
-            print splitValue7
             data[filename][7] = str(splitValue7)+'\t'
     pFile = open(excelname, 'ab+')  # newline=''
-    pFile.write(codecs.BOM_UTF8)
+    #pFile.write(codecs.BOM_UTF8)
     csv_writer = csv.writer(pFile, dialect='excel')
     if count[0]==0: 
         title=['filename', 'MAC', 'ICCID', 'IMEI', 'IMSI', 'ICCID', 'IMEI', 'IMSI']
@@ -124,7 +117,7 @@ if __name__ == '__main__':
     
     if(not os.path.exists(outResultDir)):
         make_all_dir(outResultDir)
-    outExcelData   = outResultDir + delimiter + '__result.xls'
+    outExcelData   = outResultDir + delimiter + '__result.csv'
     create_excel(outExcelData)
     [files,isfile] = get_raw_log(collectDataDir) #获取当前目录中指定格式的文件
   

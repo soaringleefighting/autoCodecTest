@@ -76,34 +76,34 @@ def collect_data_to_excel(excelname, inputfile):
         #print lines
         if lines[i].find('"mac":') != -1 and i==8:
             splitValue = (lines[i].split())[0].split(",")[0].split("\"")[-2].strip()
-            print splitValue
+            #print splitValue
             data[filename] = [str(splitValue)+'\t', 0, 0, 0, 0, 0, 0]
         if lines[i].find('"imei":') != -1 and i==43:
             splitValue2 = (lines[i].split())[0].split(",")[0].split("\"")[-2].strip()
-            print splitValue2
+            #print splitValue2
             data[filename][2] = str(splitValue2)+'\t'
         if lines[i].find('"imsi":') != -1 and i==44:
             splitValue3 = (lines[i].split())[0].split(",")[0].split("\"")[-2].strip()
-            print splitValue3
+            #print splitValue3
             data[filename][3] = str(splitValue3)+'\t'
         if lines[i].find('"iccid":') != -1 and i==45:
             splitValue1 = (lines[i].split())[0].split(",")[0].split("\"")[-2].strip()
-            print splitValue1
+            #print splitValue1
             data[filename][1] = str(splitValue1)+'\t'
         if lines[i].find('"imei":') != -1 and i==95:
             splitValue4 = (lines[i].split())[0].split(",")[0].split("\"")[-2].strip()
-            print splitValue4
+            #print splitValue4
             data[filename][5] = str(splitValue4)+'\t'
         if lines[i].find('"imsi":') != -1 and i==96:
             splitValue5 = (lines[i].split())[0].split(",")[0].split("\"")[-2].strip()
-            print splitValue5
+            #print splitValue5
             data[filename][6] = str(splitValue5)+'\t'
         if lines[i].find('"iccid":') != -1 and i==97:
             splitValue6 = (lines[i].split())[0].split(",")[0].split("\"")[-2].strip()
-            print splitValue6
+            #print splitValue6
             data[filename][4] = str(splitValue6)+'\t'
-    with open(excelname, 'ab+') as f:  #newline=''
-        csv_writer = csv.writer(f, dialect='excel') #, dialect='excel'
+    with open(excelname, 'a+') as f:  #newline=''
+        csv_writer = csv.writer(f, dialect='excel', lineterminator='\n') #, dialect='excel' 
         if count[0]==0: 
             title=['MAC', 'ICCID', 'IMEI', 'IMSI', 'ICCID', 'IMEI', 'IMSI']
             csv_writer.writerow(title)
@@ -138,7 +138,7 @@ if __name__ == '__main__':
   
     #遍历每个指定格式的文件进行数据提取
     for collectData in files:
-        print collectData
+        print('[Process]: '+collectData)
         ret = collect_data_to_excel(outExcelData,collectData)
     if(ret!=0):
         print("--------Process finished!--------")
