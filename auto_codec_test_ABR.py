@@ -1,8 +1,8 @@
 #_*_ coding=UTF-8_*_  #脚本中有中文注释必须包含这一句
 
 ################################################################################################################
-##脚本用法： python auto_codec_coherence.py <rawDemo srcStreamDir outFileDir codec> [gprofflag outyuvflag refDemo memcheckflag startIdx]
-##参数说明：	 rawDemo	 :	待验证的可执行文件（编码器/解码器）
+##脚本用法： python auto_codec_coherence.py <rawDemo srcStreamDir outFileDir codec scc> [gprofflag outyuvflag refDemo memcheckflag startIdx NosaveBin SSIM]
+##参数说明：	 rawDemo	 :	 待验证的可执行文件（编码器/解码器）
 ##				srcStreamDir:	码流/YUV路径
 ##				outFileDir	:	结果输出路径
 ##				codec		:   0: x264, 1: x265, 2:uavs3e, 3: vvenc
@@ -12,7 +12,8 @@
 ##				refDemo		: 	参考可执行文件（编码器/解码器）
 ##				memcheckflag:	使用valgrind进行内存泄露检查(默认为0)(针对linux下编译的64位库)
 ##				startIdx	: 	在批处理过程中,支持从指定序号startIdx的位置处开始执行。
-##				saveBin	    : 	是否保存编码码流, 1:不保存, 0:保存。
+##				saveBin	    : 	是否保存编码码流, 1:不保存  0:保存。
+##			    SSIM		:   是否计算SSIM, 1: 计算SSIM 0: 不计算SSIM
 ##
 ## Author : Created by lipeng at July 3 2020
 ## Version: 2.0.4
@@ -23,7 +24,7 @@
 ## (4) 2020.7.17  tag V2.0.2  支持BDBR统计分析
 ## (5) 2021.7.21  tag V2.0.3  支持中断处理功能, 区分CBR/VBR配置, 支持x264/x265/uavs3e/libaom/vvenc等开源编码器。
 ## (6) 2021.7.30  tag V2.0.3  简化脚本
-## (7) 2024.l.30  tag V2.0.4  增加是否保存码流的功能, 支持CTC和SCC不同场景码流文件解析, 支持SSIM
+## (7) 2024.l.30  tag V2.0.4  增加是否保存码流和输出log的功能, 支持CTC和SCC不同场景码流文件解析, 支持SSIM
 ################################################################################################################
 import os			#linux命令操作
 import re			#字符串匹配操作
@@ -224,7 +225,7 @@ def get_data_from_txt_x265(filename, txtfile, outdatafile, anchor='1'):
 	pFile.close()
 	print("[info]: get_data_from_txt_x265 success!")
 
-def get_data_from_txt_yl265(filename, txtfile, outdatafile, anchor='1'):
+def get_data_from_txt_yl265(filename, txtfile, outdatafile, anchor='1', SSIM=0):
 	pFile = open(txtfile, 'r')
 	lines = pFile.readlines() #读取文本中所有行
 	lineflag = 0
@@ -255,13 +256,10 @@ def get_data_from_txt_yl265(filename, txtfile, outdatafile, anchor='1'):
 			bitrate=word[1].split(' ')[1]
 			framenum=word[0].split(' ')[1]
 			PSNR = word[3].split(' ')[3].split('\n')[0]
-			#time = word[0].split(' ')[4].split('s')[0]
-			#fps  = word[0].split('fps)')[0].split('(')[-1]
 		if lines[i].find('pure encoding time:') != -1:
 			word = lines[i].split(',')
 			time = float(word[0].split(' ')[-1].split('ms')[0]) / 1000
 			fps  = word[1].split('fps:')[-1]
-			#print time, fps
 		if lines[i].find('yl265 [info]: frame I  :') != -1: # 老版本中为x265
 		#if lines[i].find('yl265 [info]: frame I:') != -1: # 老版本中为x265
 			Mean_PSNR = lines[i].strip('\n').split('PSNR Mean:')[-1]
@@ -269,8 +267,9 @@ def get_data_from_txt_yl265(filename, txtfile, outdatafile, anchor='1'):
 			U_PSNR_I    = Mean_PSNR.split(' ')[2].split('U:')[1]
 			V_PSNR_I    = Mean_PSNR.split(' ')[3].split('V:')[1] 
 			frame_numI  = lines[i].strip('\r').strip('\n').split(',')[-2].split(' ')[-1]      
-			Mean_SSIM   = Mean_PSNR.strip(' ').split("SSIM Mean:")[-1].strip(' ').split(' ')[-1].split("dB")
-			Y_SSIM_I    = Mean_SSIM[0].split('(')[1]
+			if (SSIM == 1):
+				Mean_SSIM   = Mean_PSNR.strip(' ').split("SSIM Mean:")[-1].strip(' ').split(' ')[-1].split("dB")
+				Y_SSIM_I    = Mean_SSIM[0].split('(')[1]
 		if lines[i].find('yl265 [info]: frame P  :') != -1: # x265
 		#if lines[i].find('yl265 [info]: frame P:') != -1: # x265
 			Mean_PSNR = lines[i].strip('\n').split('PSNR Mean:')[-1]
@@ -278,31 +277,44 @@ def get_data_from_txt_yl265(filename, txtfile, outdatafile, anchor='1'):
 			U_PSNR_P    = Mean_PSNR.split(' ')[2].split('U:')[1]
 			V_PSNR_P    = Mean_PSNR.split(' ')[3].split('V:')[1]
 			frame_numP  = lines[i].strip('\r').strip('\n').split(',')[-2].split(' ')[-1]
-			Mean_SSIM   = Mean_PSNR.strip(' ').split("SSIM Mean:")[-1].strip(' ').split(' ')[-1].split("dB")
-			Y_SSIM_P    = Mean_SSIM[0].split('(')[1]
+			if (SSIM == 1):
+				Mean_SSIM   = Mean_PSNR.strip(' ').split("SSIM Mean:")[-1].strip(' ').split(' ')[-1].split("dB")
+				Y_SSIM_P    = Mean_SSIM[0].split('(')[1]
 		if lines[i].find('yl265 [info]: frame B:') != -1:
 			Mean_PSNR = lines[i].strip('\n').split('PSNR Mean:')[-1]
 			Y_PSNR_B    = Mean_PSNR.split(' ')[1].split('Y:')[1]
 			U_PSNR_B    = Mean_PSNR.split(' ')[2].split('U:')[1]
 			V_PSNR_B    = Mean_PSNR.split(' ')[3].split('V:')[1]
 			frame_numB  = lines[i].strip('\r').strip('\n').split(',')[-2].split(' ')[-1]
-			Mean_SSIM   = Mean_PSNR.strip(' ').split("SSIM Mean:")[-1].strip(' ').split(' ')[-1].split("dB")
-			Y_SSIM_B    = Mean_SSIM[0].split('(')[1]
+			if (SSIM == 1):
+				Mean_SSIM   = Mean_PSNR.strip(' ').split("SSIM Mean:")[-1].strip(' ').split(' ')[-1].split("dB")
+				Y_SSIM_B    = Mean_SSIM[0].split('(')[1]
 	frameTotal = int(frame_numI) + int(frame_numP) + int(frame_numB)
 	Y_PSNR = float('%.3f' % (((float(Y_PSNR_I) * int(frame_numI)) + (float(Y_PSNR_P)*int(frame_numP)) + (float(Y_PSNR_B)*int(frame_numB)))/ frameTotal))
 	U_PSNR = float('%.3f' % (((float(U_PSNR_I) * int(frame_numI)) + (float(U_PSNR_P)*int(frame_numP)) + (float(U_PSNR_B)*int(frame_numB)))/ frameTotal))
 	V_PSNR = float('%.3f' % (((float(V_PSNR_I) * int(frame_numI)) + (float(V_PSNR_P)*int(frame_numP)) + (float(V_PSNR_B)*int(frame_numB)))/ frameTotal))
-	Y_SSIM = float('%.3f' % (((float(Y_SSIM_I) * int(frame_numI)) + (float(Y_SSIM_P)*int(frame_numP)) + (float(Y_SSIM_B)*int(frame_numB)))/ frameTotal))
+	if (SSIM == 1):
+		Y_SSIM = float('%.3f' % (((float(Y_SSIM_I) * int(frame_numI)) + (float(Y_SSIM_P)*int(frame_numP)) + (float(Y_SSIM_B)*int(frame_numB)))/ frameTotal))
 	pFile.close()
 	pFile = open(outdatafile, 'a+')
 	if(anchor==1):
-		oneline = filename + '(anchor)' + ' '*(30-len(filename)+20) + \
-		framenum + 10*' ' + bitrate + 10*' ' + str(Y_PSNR) + 10*' ' + \
-		str(U_PSNR) + 10*' ' + str(V_PSNR) + 10*' ' + str(Y_SSIM) + 10*' ' + str(time) + 10*' ' +  fps + '\n'
+		if (SSIM == 1):
+			oneline = filename + '(anchor)' + ' '*(30-len(filename)+20) + \
+			framenum + 10*' ' + bitrate + 10*' ' + str(Y_PSNR) + 10*' ' + \
+			str(U_PSNR) + 10*' ' + str(V_PSNR) + 10*' ' + str(Y_SSIM) + 10*' ' + str(time) + 10*' ' +  fps + '\n'
+		else:
+			oneline = filename + '(anchor)' + ' '*(30-len(filename)+20) + \
+			framenum + 10*' ' + bitrate + 10*' ' + str(Y_PSNR) + 10*' ' + \
+			str(U_PSNR) + 10*' ' + str(V_PSNR)   + 10*' ' + str(time) + 10*' ' +  fps + '\n'		
 	else:
-		oneline = filename + '(ref)   ' + ' '*(30-len(filename)+20) + \
-		framenum + 10*' ' + bitrate + 10*' ' + str(Y_PSNR) + 10*' ' + \
-		str(U_PSNR) + 10*' ' + str(V_PSNR) + 10*' ' + str(Y_SSIM) + 10*' ' + str(time) + 10*' ' +  fps + '\n'
+		if (SSIM == 1):
+			oneline = filename + '(ref)   ' + ' '*(30-len(filename)+20) + \
+			framenum + 10*' ' + bitrate + 10*' ' + str(Y_PSNR) + 10*' ' + \
+			str(U_PSNR) + 10*' ' + str(V_PSNR) + 10*' ' + str(Y_SSIM) + 10*' ' + str(time) + 10*' ' +  fps + '\n'
+		else:
+			oneline = filename + '(ref)   ' + ' '*(30-len(filename)+20) + \
+			framenum + 10*' ' + bitrate + 10*' ' + str(Y_PSNR) + 10*' ' + \
+			str(U_PSNR) + 10*' ' + str(V_PSNR)   + 10*' ' + str(time) + 10*' ' +  fps + '\n'			
 	pFile.write(oneline)
 	pFile.close()
 	print("[info]: get_data_from_txt_yl265 success!")
@@ -317,7 +329,6 @@ def get_data_from_txt_KSC265(filename, txtfile, outdatafile, anchor='1'):
 	pFile = open(txtfile, 'r')
 	lines = pFile.readlines() #读取文本中所有行
 	Data = {}  #dictory
-
 	for i in range(len(lines)):
 		if lines[i].find('pure encoding time:') != -1:
 			word = lines[i].split(',')
@@ -415,27 +426,30 @@ def get_data_from_txt_vvenc(filename, txtfile, outdatafile, anchor='1'):
 
 #collect data from formated text to excel
 count = 0
-def collect_data_to_excel(excelname, inputfile, anchor='1', processIdx=0):
+def collect_data_to_excel(excelname, inputfile, anchor='1', processIdx=0, SSIM=0):
 	pFile = open(inputfile, 'r')
 	lines = pFile.readlines()
 	#data = {}  ##默认字典是无序的(hash)
 	data = OrderedDict()  ##使用有序字典
-	#print(lines)
 	for i in range(len(lines)):
-
 		if lines[i].find('anchor') != -1 or lines[i].find('ref') != -1:
 			splitValue = lines[i].split()  ##此处根据具体文本数据格式进行分割提取
 			#print(splitValue)
 			filename = get_file_name_ext(splitValue[0])
-			data[filename] = [filename, splitValue[1], splitValue[2], splitValue[3], splitValue[4], splitValue[5], splitValue[6], splitValue[7]]
+			if (SSIM == 1):
+				data[filename] = [filename, splitValue[1], splitValue[2], splitValue[3], splitValue[4], splitValue[5], splitValue[6], splitValue[7]]
+			else:
+				data[filename] = [filename, splitValue[1], splitValue[2], splitValue[3], splitValue[4], splitValue[5], splitValue[6]]		
 			print(data[filename])
-
 	pFile = open(excelname, 'a+')
 	pFile.write(codecs.BOM_UTF8)
 	csv_writer=csv.writer(pFile, dialect='excel')
 	global count
 	if count==0 and processIdx==0:  ##第一次打开文件时才写入
-		title=['video sequence', 'total frames', 'bitrate(kbps)', 'Y-PSNR(dB)', 'U-PSNR(dB)', 'V-PSNR(dB)', 'Y-SSIM(dB)','time(s)']
+		if (SSIM == 1):
+			title=['video sequence', 'total frames', 'bitrate(kbps)', 'Y-PSNR(dB)', 'U-PSNR(dB)', 'V-PSNR(dB)', 'Y-SSIM(dB)','time(s)']
+		else:
+			title=['video sequence', 'total frames', 'bitrate(kbps)', 'Y-PSNR(dB)', 'U-PSNR(dB)', 'V-PSNR(dB)', 'time(s)']		
 		csv_writer.writerow(title)
 		count=count+1
 	for key, value in data.items():
@@ -445,7 +459,7 @@ def collect_data_to_excel(excelname, inputfile, anchor='1', processIdx=0):
 #linux下内存泄漏检查valgrind
 def perform_valgrind_data(outFileDir, Anchordeccmd='0', onlystreamname='0', Refdeccmd='0', reserve='0'):
 	outmemcheckanchortxt = outFileDir + delimiter  + '__pyMemcheckAnchor.log'
-	outmemcheckreftxt = outFileDir + delimiter  + '__pyMemcheckRef.log'
+	outmemcheckreftxt    = outFileDir + delimiter  + '__pyMemcheckRef.log'
 	if Anchordeccmd != '0':
 		redirectcmd = Anchordeccmd
 		cmd = ' '.join(['valgrind',
@@ -482,7 +496,7 @@ def get_data_from_log(filename, logfile, outdatafile):
 	return
 
 #编码或解码处理
-def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', scc='0', gprof='0', yuvflag='0', refDemo='0', memcheckflag='0', startIdx=0, saveBin=0):
+def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', scc='0', gprof='0', yuvflag='0', refDemo='0', memcheckflag='0', startIdx=0, saveBin=0, SSIM=0):
 	if (os.path.exists(srcBinDir) == False):
 		print('[error]: the input file path is not exist')
 		return -1
@@ -547,8 +561,12 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', scc='0', gp
 		print('[Info] Process: ' + filename)
 
 		pFile = open(outtotal, 'w') #创建汇总文件，性能数据
-		totaltitle = 'filename' + ' '*(42 - len('#filename') + 15) + 'total_frames'+ 10*' ' + 'bitrate(Kbps)'  + 10*' ' + 'Y-PSNR(dB)' + 10*' ' +\
-						'U-PSNR(dB)' + 10*' ' + 'V-PSNR(dB)' + 10*' ' + 'SSIM(dB)' + 10*' ' + 'time(s)' + 10*' ' + 'fps'
+		if (SSIM == 1):
+			totaltitle = 'filename' + ' '*(42 - len('#filename') + 15) + 'total_frames'+ 10*' ' + 'bitrate(Kbps)'  + 10*' ' + 'Y-PSNR(dB)' + 10*' ' +\
+							'U-PSNR(dB)' + 10*' ' + 'V-PSNR(dB)' + 10*' ' + 'SSIM(dB)' + 10*' ' + 'time(s)' + 10*' ' + 'fps'
+		else:
+			totaltitle = 'filename' + ' '*(42 - len('#filename') + 15) + 'total_frames'+ 10*' ' + 'bitrate(Kbps)'  + 10*' ' + 'Y-PSNR(dB)' + 10*' ' +\
+				'U-PSNR(dB)' + 10*' ' + 'V-PSNR(dB)' + 10*' ' + 'time(s)' + 10*' ' + 'fps'
 		pFile.writelines(totaltitle)
 		pFile.write('\n')
 		pFile.close()
@@ -666,7 +684,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', scc='0', gp
 			elif codec == '4':
 				get_data_from_txt_KSC265(stream_name_res+'_br'+br, outrawtxt, outtotal, 1)
 			elif codec == '5':
-				get_data_from_txt_yl265(stream_name_res+'_br'+br, outrawtxt, outtotal, 1)
+				get_data_from_txt_yl265(stream_name_res+'_br'+br, outrawtxt, outtotal, 1, SSIM)
 
 			## 4. gprof性能分析
 			if(int(gprof)==1): #默认为0，表示不使用性能分析工具gprof
@@ -699,7 +717,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', scc='0', gp
 					pFileDismatch.write('\n')
 
 		## 7.将数据结果从格式化文本写入到excel中 outtotal--->outExcelData
-		collect_data_to_excel(outExcelData, outtotal, 1, processIdx)
+		collect_data_to_excel(outExcelData, outtotal, 1, processIdx, SSIM)
 		print("[info]: -----collect data to excel success!------")
 
 	if (saveBin != 0):
@@ -715,7 +733,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', scc='0', gp
 ####################################main 函数入口####################################################
 if __name__ == '__main__':
 	if(len(sys.argv) < 6):
-		print('Usage: ' + '<rawDemo srcStreamDir outFileDir codec scc> [gprof yuvflag refDemo memcheckflag startIdx saveBin] ')
+		print('Usage: ' + '<rawDemo srcStreamDir outFileDir codec scc> [gprof yuvflag refDemo memcheckflag startIdx NosaveBin SSIM] ')
 		print('Notice: <> is necessary, [] is optional')
 		print('Notice: codec: 0: x264, 1: x265, 2: uavs3e, 3: vvenc, 4: ksc265, 5: yl265'+ '\n')
 		exit()
@@ -749,8 +767,12 @@ if __name__ == '__main__':
 		saveBin = int(sys.argv[11])
 	else:
 		saveBin = 0	
+	if len(sys.argv) >= 13:
+		SSIM = int(sys.argv[12])
+	else:
+		SSIM = 0	
 	## 编解码处理和数据统计
-	ret = process_encode_decode(rawDemo, srcStreamDir, outFileDir, codec, scc, gprof, yuvflag, refDemo, memcheckflag, startIdx, saveBin)
+	ret = process_encode_decode(rawDemo, srcStreamDir, outFileDir, codec, scc, gprof, yuvflag, refDemo, memcheckflag, startIdx, saveBin, SSIM)
 	if (ret!=0):
 		print("[info]: ---------Process finished!---------")
 	exit()

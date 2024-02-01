@@ -423,8 +423,9 @@ def ComputeBDBR_PSNR_SSIM_Time(index_num, SSIM):
                         testUPSNR_dict[filename], testBit_dict[filename], True)
     BDBR_V = computeBDRate(4, origVPSNR_dict[filename], origBit_dict[filename], \
                         testVPSNR_dict[filename], testBit_dict[filename], True)
-    SSIM_BDBRY = computeBDRate(4, origYSSIM_dict[filename], origBit_dict[filename], \
-                        testYSSIM_dict[filename], testBit_dict[filename], True)
+    if (SSIM == 1):
+        SSIM_BDBRY = computeBDRate(4, origYSSIM_dict[filename], origBit_dict[filename], \
+                            testYSSIM_dict[filename], testBit_dict[filename], True)
     BDBR_Y = float('%.1f' %(BDBR_Y * 100))
     BDBR_U = float('%.1f' %(BDBR_U * 100))
     BDBR_V = float('%.1f' %(BDBR_V * 100))
@@ -432,8 +433,9 @@ def ComputeBDBR_PSNR_SSIM_Time(index_num, SSIM):
     BDBRU_avg += BDBR_U
     BDBRV_avg += BDBR_V
     YUVBDBR_avg = float('%.3f' %((6 * BDBR_Y +  BDBR_U + BDBR_V) / 8))
-    SSIM_BDBRY  = float('%.3f' %(SSIM_BDBRY * 100))
-    SSIMBDBR_avg += SSIM_BDBRY
+    if (SSIM == 1):
+        SSIM_BDBRY  = float('%.3f' %(SSIM_BDBRY * 100))
+        SSIMBDBR_avg += SSIM_BDBRY
 
     if (len(sys.argv) > 5):
         BDBR_Y_2 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
@@ -442,8 +444,9 @@ def ComputeBDBR_PSNR_SSIM_Time(index_num, SSIM):
                         testUPSNR_dict2[filename], testBit_dict2[filename], True)
         BDBR_V_2 = computeBDRate(4, origVPSNR_dict[filename], origBit_dict[filename], \
                         testVPSNR_dict2[filename], testBit_dict2[filename], True)
-        SSIM_BDBRY_2 = computeBDRate(4, origYSSIM_dict[filename], origBit_dict[filename], \
-                        testYSSIM_dict2[filename], testBit_dict[filename], True)
+        if (SSIM == 1):
+            SSIM_BDBRY_2 = computeBDRate(4, origYSSIM_dict[filename], origBit_dict[filename], \
+                            testYSSIM_dict2[filename], testBit_dict[filename], True)
         BDBR_Y_2 = float('%.1f' %(BDBR_Y_2 * 100))
         BDBR_U_2 = float('%.1f' %(BDBR_U_2 * 100))
         BDBR_V_2 = float('%.1f' %(BDBR_V_2 * 100))
@@ -451,8 +454,9 @@ def ComputeBDBR_PSNR_SSIM_Time(index_num, SSIM):
         BDBRU_avg_2 += BDBR_U_2
         BDBRV_avg_2 += BDBR_V_2
         YUVBDBR_avg_2 = float('%.3f' %((6 * BDBR_Y_2 +  BDBR_U_2 + BDBR_V_2) / 8))
-        SSIM_BDBRY_2  = float('%.3f' %(SSIM_BDBRY_2 * 100))
-        SSIMBDBR_avg_2 += SSIM_BDBRY_2
+        if (SSIM == 1):
+            SSIM_BDBRY_2  = float('%.3f' %(SSIM_BDBRY_2 * 100))
+            SSIMBDBR_avg_2 += SSIM_BDBRY_2
     if (len(sys.argv) > 6):
         BDBR_Y_3 = computeBDRate(4, origYPSNR_dict[filename], origBit_dict[filename], \
                     testYPSNR_dict3[filename], testBit_dict3[filename], True)
@@ -460,8 +464,9 @@ def ComputeBDBR_PSNR_SSIM_Time(index_num, SSIM):
                     testUPSNR_dict3[filename], testBit_dict3[filename], True)
         BDBR_V_3 = computeBDRate(4, origVPSNR_dict[filename], origBit_dict[filename], \
                     testVPSNR_dict3[filename], testBit_dict3[filename], True)
-        SSIM_BDBRY_3 = computeBDRate(4, origYSSIM_dict[filename], origBit_dict[filename], \
-                        testYSSIM_dict3[filename], testBit_dict[filename], True)
+        if (SSIM == 1):
+            SSIM_BDBRY_3 = computeBDRate(4, origYSSIM_dict[filename], origBit_dict[filename], \
+                            testYSSIM_dict3[filename], testBit_dict[filename], True)
         BDBR_Y_3 = float('%.1f' %(BDBR_Y_3 * 100))
         BDBR_U_3 = float('%.1f' %(BDBR_U_3 * 100))
         BDBR_V_3 = float('%.1f' %(BDBR_V_3 * 100))
@@ -469,8 +474,9 @@ def ComputeBDBR_PSNR_SSIM_Time(index_num, SSIM):
         BDBRU_avg_3 += BDBR_U_3
         BDBRV_avg_3 += BDBR_U_3 
         YUVBDBR_avg_3 = float('%.3f' %((6 * BDBR_Y_3 +  BDBR_U_3 + BDBR_V_3) / 8)) 
-        SSIM_BDBRY_3  = float('%.3f' %(SSIM_BDBRY_3 * 100))
-        SSIMBDBR_avg_3 += SSIM_BDBRY_3
+        if (SSIM == 1):
+            SSIM_BDBRY_3  = float('%.3f' %(SSIM_BDBRY_3 * 100))
+            SSIMBDBR_avg_3 += SSIM_BDBRY_3
     ## 2.计算Delta_YPSNR, Delta_UPSNR, Delta_VPSNR
     Delta_YPSNR_list = testYPSNR_dict[filename] - origYPSNR_dict[filename]
     for i in Delta_YPSNR_list:
@@ -751,7 +757,8 @@ if __name__ == '__main__':
     Delta_VPSNR_avg = float('%.3f' %(Delta_VPSNR_avg / seq_num))
     Delta_time_avg  = float('%.3f' %(Delta_time_avg  / seq_num))
     YUVBDBR_avg     = float('%.3f' %((6 * BDBRY_avg +  BDBRU_avg + BDBRV_avg) / 8))
-    SSIMBDBR_avg    = float('%.3f' %( SSIMBDBR_avg / seq_num))
+    if (SSIM_enable == 1):
+        SSIMBDBR_avg    = float('%.3f' %( SSIMBDBR_avg / seq_num))
     if (len(sys.argv) > 5):
         BDBRY_avg_2       = float('%.1f' %(BDBRY_avg_2   / seq_num))
         BDBRU_avg_2       = float('%.1f' %(BDBRU_avg_2   / seq_num))
@@ -761,7 +768,8 @@ if __name__ == '__main__':
         Delta_VPSNR_avg_2 = float('%.3f' %(Delta_VPSNR_avg_2 / seq_num))
         Delta_time_avg_2  = float('%.3f' %(Delta_time_avg_2  / seq_num))
         YUVBDBR_avg_2     = float('%.3f' %((6 * BDBRY_avg_2 +  BDBRU_avg_2 + BDBRV_avg_2) / 8))
-        SSIMBDBR_avg_2    = float('%.3f' %( SSIMBDBR_avg_2 / seq_num))
+        if (SSIM_enable == 1):
+            SSIMBDBR_avg_2    = float('%.3f' %( SSIMBDBR_avg_2 / seq_num))
     if (len(sys.argv) > 6):
         BDBRY_avg_3       = float('%.1f' %(BDBRY_avg_3   / seq_num))
         BDBRU_avg_3       = float('%.1f' %(BDBRU_avg_3   / seq_num))
@@ -771,7 +779,8 @@ if __name__ == '__main__':
         Delta_VPSNR_avg_3 = float('%.3f' %(Delta_VPSNR_avg_3 / seq_num))
         Delta_time_avg_3  = float('%.3f' %(Delta_time_avg_3  / seq_num))   
         YUVBDBR_avg_3     = float('%.3f' %((6 * BDBRY_avg_3 +  BDBRU_avg_3 + BDBRV_avg_3) / 8))
-        SSIMBDBR_avg_3    = float('%.3f' %( SSIMBDBR_avg_3 / seq_num))
+        if (SSIM_enable == 1):
+            SSIMBDBR_avg_3    = float('%.3f' %( SSIMBDBR_avg_3 / seq_num))
    
     # 写入最后一行数据
     pFile = open(outExcelData, 'a+') #创建汇总文件，追加性能数据
