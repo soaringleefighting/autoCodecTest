@@ -64,7 +64,7 @@ def get_raw_mpeg4(rawdir):
 	isfile = 0
 	if os.path.isdir(rawdir):
 		allfiles = os.listdir(rawdir)
-		print allfiles
+		print(allfiles)
 		files = [rawdir+"/"+f for f in allfiles if re.search('yuv$',f)]
 	elif os.path.isfile(rawdir):
 		isfile = 1
@@ -546,7 +546,7 @@ def process_encode_decode(rawDemo, srcBinDir, outFileDir, codec='0', scc='0', gp
 	csv_file1 = pd.read_csv(ABR_excel, encoding='utf-8') #__result_yl265_ABR.csv
 	bitrate   = csv_file1.loc[:,'bitrate(kbps)']
 	br_list   = list(bitrate)
-	print  br_list
+	print(br_list)
 
 	loop = -4
 	## 3.遍历每个码流文件进行编码或解码
